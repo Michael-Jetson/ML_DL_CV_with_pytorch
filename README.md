@@ -26,3 +26,4 @@
 - pytorch_image_classification是一个基于pytorch的图像分类数据集
 - scripts是随意编写的Python脚本
 
+参考书：周志华《机器学习》，李航《统计学习方法》
