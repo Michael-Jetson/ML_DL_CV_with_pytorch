@@ -11,6 +11,7 @@
 ├── CS61B
 ├── data_structure
 ├── Java
+├── img_cls
 ├── Jupyter
 ├── obsidian
 ├── pytorch_image_classification
@@ -25,5 +26,6 @@
 - Obsidian是使用Obsidian笔记本写的笔记（包括他人的笔记）
 - pytorch_image_classification是一个基于pytorch的图像分类数据集
 - scripts是随意编写的Python脚本
+- img_cls是一个使用不同网络进行图像分类的简单项目，个人感觉这是一个很标准的小项目
 
 参考书：周志华《机器学习》，李航《统计学习方法》
