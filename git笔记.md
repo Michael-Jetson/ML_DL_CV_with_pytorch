@@ -125,17 +125,17 @@ git commit -a -m "submit information"
 
 我们先使用vscode打开一个文件夹，可以在vscode左侧看到有Git图标
 
-![image-20230422212938861](/home/robot/文档/ML_DL_CV_with_pytorch/img/image-20230422212938861.png)
+![image-20230422212938861](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230422212938861.png?raw=true)
 
 这个是使用图形界面进行初始化的方式，与``git init``效果一致，只不过换了一种方式
 
 如果我们创建或者修改了一个文件，那么可能就会有这种图标
 
-![image-20230422213523870](/home/robot/文档/ML_DL_CV_with_pytorch/img/image-20230422213523870.png)
+![image-20230422213523870](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230422213523870.png?raw=true)
 
 一个绿色的U，代表的是未跟踪（Untracked），还没有被管理
 
-![image-20230422215044805](/home/robot/文档/ML_DL_CV_with_pytorch/img/image-20230422215044805.png)
+![image-20230422215044805](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230422215044805.png?raw=true)
 
 我们在修改文件后，想提交的话可以通过这个进行提交，简化了操作
 
@@ -221,7 +221,7 @@ git rm file_name
 git rm filename -f
 ```
 
-强制删除
+上面是一个强制删除的命令
 
 ```shell
 git mv old_name new_name
@@ -233,7 +233,7 @@ git mv old_name new_name
 
 这就是将1.txt文件重命名为2.txt
 
-### 7.分支
+### 8.分支
 
 git在存储文件的时候，每一次提交代码，都会在仓库创建一个对应的节点，用来存储当前代码的状态，所有的节点构成树状结构，也就是说会存在分支
 
@@ -241,22 +241,43 @@ git在存储文件的时候，每一次提交代码，都会在仓库创建一�
 
 各个分支开发进度互不干扰		
 
-```shell
-git branch # 查询所有分支，分之前带 * 的为当前所在分支
-git branch dev # 创建分支"dev"
-git checkout dev # 切换到分支"dev"
+这里有一个很实际的应用场景，比如说项目要上线，但是我们需要同时去继续开发这个项目那么怎么办？我们不可能直接在上面开发并且发布，否则很容易出问题，这个时候就需要再开一个分支了，一个分支就是一个独立的代码仓库，后面还可以进行合并分支操作
 
+多分支示意图如下
+
+![image-20230423141934006](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423141934006.png)
+
+```shell
+git branch # 查询所有分支，分支前带 * 的为当前所在分支
+git branch dev # 创建分支"dev"
+git branch -d dev#删除分支"dev"
+git checkout dev # 切换到分支"dev"
+git switch dev#切换分支到dev
+git switch -c dev#创建并且切换到dev分支
+```
+
+- 至于为什么会有两个看起来功能一模一样的切换分支命令，是因为``git checkout``这个命令，承担了过多的功能，不但可以切换分支还可以用来恢复工作区文件，容易造成混淆，所以Git社区发布了新命令（在2.23版本之后发布），其中``git switch``只有切换分支功能，``git restore``只有恢复文件功能，这两个命令替换了原来的``git cheackout``功能
+
+```shell
 # 将bug分支合并到master分支
 git branch bug
-git checkout bug
-git checkout master	# 切换到master分支
-git merge bug	# 将bug分支合并到master分支
-git branch -d bug # 删除bug分支
+git switch bug
+git switch master	# 切换到master分支
+git merge bug	# 将bug分支合并到master分支，并且commit好
+git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 ```
+
+![image-20230423142153977](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423142153977.png)
+
+如果我们使用命令将bug1分支合并到master分支中，会出现Fast-forward消息（也就是快速合并），这是因为bug1分支领先多个版本（多出多个节点）
+
+合并之后，会有这种情况
+
+![image-20230423142703033](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423142703033.png)
 
 * **注意：**如果主分支有两个指向他的分支，另一个分支在修改后合并到主分支，第二个分支此时的内容还是未修改时的主分支内容，如果此时合并会造成**冲突**，需要手动修改冲突位置
 
-### 8.工作流
+### 9.工作流
 
 关于分支使用规范，实际开发过程中，开发中的版本要创建一个dev等其他名称的分支进行开发和测试，master分支中永远存放稳定的版本·
 
@@ -617,3 +638,4 @@ files/ 			# 忽略文件夹files
 
 * issuse：文档以及任务管理。对项目有疑问，提出问题，提出bug修改等操作。![](./git_img/issuse.png)
 * wiki：对项目进行介绍，文档，说明。
+
