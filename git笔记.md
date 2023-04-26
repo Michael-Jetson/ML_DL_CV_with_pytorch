@@ -247,7 +247,7 @@ git在存储文件的时候，每一次提交代码，都会在仓库创建一�
 
 多分支示意图如下
 
-![image-20230423141934006](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423141934006.png)
+![image-20230423141934006](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230423141934006.png?raw=true)
 
 #### 8.2 创建/切换/删除分支
 
@@ -273,17 +273,17 @@ git merge bug	# 将bug分支合并到master分支，并且commit好
 git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 ```
 
-![image-20230423142153977](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423142153977.png)
+![image-20230423142153977](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230423142153977.png?raw=true)
 
 如果我们使用命令将bug1分支合并到master分支中，会出现Fast-forward消息（也就是快速合并），这是因为bug1分支领先多个版本（多出多个节点），并且在同一条线上
 
 合并之后，会有这种情况
 
-![image-20230423142703033](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423142703033.png)
+![image-20230423142703033](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230423142703033.png?raw=true)
 
 * **注意：**如果合并的时候，两个分支不是单纯的前后关系，或者说存在同一个文件在两个分支中都有修改的情况，那么合并的时候就会出现冲突的问题，需要手动修改，比如说下图中，我们需要合并update分支到master分支，但是这两个分支是两条线上的，并且两个分支都对同一个文件有不同的修改，那么就无法直接合并
 
-![image-20230423145531856](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423145531856.png)
+![image-20230423145531856](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230423145531856.png?raw=true)
 
 如果不同分支，没有对同一个文件的不同修改，那么就可以直接合并，比如说master分支只修改了文件1，update分支只修改了文件2，那么可以直接进行合并，而不会产生冲突
 
@@ -295,7 +295,7 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 
 在下图中，update分支的根是C4节点，或者说C4是update分支的base
 
-![image-20230423160421832](/home/robot/文档/ML_DL_CV_with_pytorch/git_img/image-20230423160421832.png)
+![image-20230423160421832](/home/robot/Project/ML_DL_CV_with_pytorch/assets/image-20230423160421832.png)
 
 我们可以将update的基变为C8，类似于换花盆种花，这样子之后，原本是两支，现在就是一支了，那么合并分支的时候就可以快速合并，并且不会产生多余记录
 
@@ -303,7 +303,20 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 
 - 首先，我们需要找到最近的共同祖先——也就是C4节点，尽管两个分支有很多的共同节点，但是C4才是最近的，所以Git会找到这个
 - 然后对比当前分支相比于祖先的历史提交，查看发生了哪些变化，并且将祖先不同提取出来，存储到一个临时文件中
-- 将当前部分指向目标
+- 将当前部分指向目标的基底
+- 以当前基底开始，重新执行历史操作，也就是说，把从共同祖先到最新分支的历史操作，重新在新基底上进行操作，变基之后的分支如下图所示
+- ![image-20230426110027312](/home/robot/Project/ML_DL_CV_with_pytorch/assets/image-20230426110027312.png)
+
+```shell
+git switch update#先切换到要变基的分支，也就是update分支
+git rebase master#进行变基，但是类似于merge操作，如果两个分支都对同一个文件有新操作，那么基会有冲突
+```
+
+然后就可以进行合并分支操作，这样就可以完成快速合并操作了
+
+注意一下，变基和合并两种操作，对于合并分支这个操作来说，最终结果一致，但是变基可以让代码的提交记录更为整洁
+
+注意一下，大多数情况下合并和变基是可以互换的，但是如果分支已经提交给了远程仓库，那么这时候就尽量不要变基
 
 ### 9.工作流
 
@@ -313,15 +326,30 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 
 ## 二、GitHub(云端托管仓库)
 
-```shell
-git remote add 远程仓库名字 远程仓库地址
-# 添加远程仓库链接
-git push -t 远程仓库名字 分支
-# 将分支内的内容推送到远程分支
-# 注意：一般情况下远程仓库名字用 origin
-git clone 仓库地址
-# 将云端仓库克隆(拉取)到本地
+目前我对于 git 所有操作都是在本地进行的。在开发中显然不能这样的，这时我们就需要一个远程的 git 仓库。
 
+远程的 git 仓库和本地的本质没有什么区别，不同点在于远程的仓库可以被多人同时访问使用，这种在团队开发的时候非常方便，比如说团队里面若干人，云端仓库可以被多个人拉取代码并且修改，修改完成之后继续提交，方便协同开发。在实际工作中，git 的服务器通常由公司搭建内部使用或是购买一些公共的私有 git 服务器。
+
+我们学习阶段，直接使用一些开放的公共 git 仓库。目前我们常用的库有两个：GitHub 和 Gitee（码云）
+
+
+
+```shell
+git remote
+#列出关联的远程库的仓库名
+git remote add 远程仓库名字 远程仓库地址
+# 添加远程仓库链接，完成关联，示例如下，一般主仓库名为origin
+git remote add origin https://github.com/lilichao/git-demo.git
+git remote remove <远程仓库名>#删除远程库关联
+git branch -M main#修改当前分支名字为main
+git push -u 远程仓库名字 分支
+# 将本地分支内的内容推送到远程分支（上传并关联），前提是分支名一致
+# 注意：一般情况下远程仓库名字用 origin
+#如果关联之后，再次提交只需要git push即可，第一次提交需要进行关联
+#如果远程库的版本更新，则无法推送
+git clone 仓库地址 [path]
+# 将云端仓库克隆(拉取)到本地
+#可以自定义路径，如果自定义路径，那么项目内容就会克隆到指定路径下
 ```
 
 ```shell
@@ -333,9 +361,12 @@ git remote add origin 远程仓库地址
 ```shell
 # 当远程仓库已经更新，但是本地未更新时，比如开发者用一台电脑开发并上传并想使用另一台电脑继续开发， 多人协作时其他人更新仓库之后，开发者在其基础上开发，需使用命令
 git pull origin dev
-
+#git fetch是将远程主机的最新内容拉到本地，用户在检查了以后决定是否合并到工作本机分支中。
+#而git pull 则是将远程主机的最新内容拉下来后直接合并，即：git pull = git fetch + git merge，这样可能会产生冲突，需要手动解决。
 # 注意，拉取之前首先切换到dev分支
-git checkout dev
+git fetch
+git merge origin/master#将远程库的内容合并进本地库
+git switch dev
 # 首次开发更新一下dev分支
 git merge master
 # 然后拉取远程仓库的更新
