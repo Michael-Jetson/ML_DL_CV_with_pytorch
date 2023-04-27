@@ -295,7 +295,7 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 
 在下图中，update分支的根是C4节点，或者说C4是update分支的base
 
-![image-20230423160421832](/home/robot/Project/ML_DL_CV_with_pytorch/assets/image-20230423160421832.png)
+![image-20230423160421832](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230423145531856.png?raw=true)
 
 我们可以将update的基变为C8，类似于换花盆种花，这样子之后，原本是两支，现在就是一支了，那么合并分支的时候就可以快速合并，并且不会产生多余记录
 
@@ -305,7 +305,7 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 - 然后对比当前分支相比于祖先的历史提交，查看发生了哪些变化，并且将祖先不同提取出来，存储到一个临时文件中
 - 将当前部分指向目标的基底
 - 以当前基底开始，重新执行历史操作，也就是说，把从共同祖先到最新分支的历史操作，重新在新基底上进行操作，变基之后的分支如下图所示
-- ![image-20230426110027312](/home/robot/Project/ML_DL_CV_with_pytorch/assets/image-20230426110027312.png)
+- ![image-20230426110027312](/home/robot/Project/ML_DL_CV_with_pytorch/git_img/image-20230426110027312.png)
 
 ```shell
 git switch update#先切换到要变基的分支，也就是update分支
