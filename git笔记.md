@@ -305,7 +305,7 @@ git branch -d bug # 删除bug分支，这时候bug1分支就没用了
 - 然后对比当前分支相比于祖先的历史提交，查看发生了哪些变化，并且将祖先不同提取出来，存储到一个临时文件中
 - 将当前部分指向目标的基底
 - 以当前基底开始，重新执行历史操作，也就是说，把从共同祖先到最新分支的历史操作，重新在新基底上进行操作，变基之后的分支如下图所示
-- ![image-20230426110027312](/home/robot/Project/ML_DL_CV_with_pytorch/git_img/image-20230426110027312.png)
+- ![image-20230426110027312](https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/git_img/image-20230426110027312.png?raw=true)
 
 ```shell
 git switch update#先切换到要变基的分支，也就是update分支
