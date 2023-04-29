@@ -8,8 +8,9 @@
 .
 ├── c++
 ├── cmake_demo
-├── CS61B
+├── EECS498
 ├── data_structure
+├── git_img
 ├── Java
 ├── img_cls
 ├── Jupyter
@@ -19,8 +20,9 @@
 ```
 
 - cmake_demo是使用cmake进行C++编程的练习例程
-- CS61B是基于IDEA使用Java完成的CS61B课程的项目和作业
+- EECS498是在大佬开源笔记上进行修改的笔记，内容是参考密歇根大学EECS498（CS231N课程的扩充版）进行修改的
 - data_structure是使用Python完成的数据结构练习
+- git_img是git笔记中图片保存的位置
 - Java是随手编写的Java程序
 - Jupyter是基于torch完成的机器学习/深度学习项目，编辑器为Jupyter Notebook
 - Obsidian是使用Obsidian笔记本写的笔记（包括他人的笔记）
