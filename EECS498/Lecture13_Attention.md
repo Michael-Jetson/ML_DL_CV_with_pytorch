@@ -1,8 +1,8 @@
 # 从RNN中得到启发
 
-我们使用递归神经网络进行序列到序列的预测，接受一些输入序列然后输出一些序列（比如说翻译，或者视频字幕），其中的工作方式是一个称为编码器的循环神经网络接受并且处理原始输入向量，然后产生隐藏状态序列，并且在最后总结输入，产生两个输出向量（隐藏状态和上下文向量），上下文向量是要传送给解码器的每一个时间步的
+我们使用递归神经网络进行序列到序列的预测，接受一些输入序列然后输出一些序列（比如说翻译，或者视频字幕），其中的工作方式如下：一个称为编码器的循环神经网络接受并且处理原始输入向量，然后产生隐藏状态序列，并且在最后总结输入，产生两个输出向量（隐藏状态和上下文向量），上下文向量是要传送给解码器的每一个时间步的
 
-![10](./assets/10.png)
+![10](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/10.png)
 
 在解码器的开始，同时接受隐藏状态和上下文向量，然后用开始标记作为输入
 
@@ -25,7 +25,7 @@ f_{att}\quad is \quad an\quad MLP(多层感知机)
 $$
 这些对齐函数会输出一个分数，这个分数表示，考虑到解码器的当前隐藏状态，我们应该对编码器的每个隐藏状态关注多少，不过最开始，这些分数也是随机的，因为是直接从前馈函数中产生的，没有经过反向传播的学习
 
-![14](./assets/14.png)
+![14](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/14.png)
 
 我们会根据这个分数，以某种方式在解码器的每一步构建一个新的上下文向量，在使用比对分数的时候，我们将会使用这个对齐函数来比较$s_0$和$h_i$，比对分数代表模型认为隐藏状态对于预测输出隐藏状态$s_0$之后的单词所必须的程度
 
@@ -43,7 +43,7 @@ $$
 
 然后，我们就可以使用我们计算出的上下文向量和输入来进行预测了（如下图所示）
 
-![16](./assets/16.png)
+![16](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/16.png)
 
 我们输入上下文向量和第一个输入单词，然后我们得到的输出词可能对应于输入词中的一个或者多个单词，但是我们这里的上下文向量是动态生成的，它允许解码器专注于编码器网络不同的输入
 
@@ -51,7 +51,7 @@ $$
 
 然后我们在使用解码器中上一步的隐藏状态来计算这一步的上下文向量（重复之前的对齐、概率分布计算等操作），来继续生成新的文本
 
-![19](./assets/19.png)
+![19](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/19.png)
 
 ## 意义
 
@@ -77,7 +77,7 @@ $$
 
 模型通过对输入图像的特征网格进行加权重组来生成自己的新上下文向量
 
-![35](./assets/35.png)
+![35](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/35.png)
 
 ## 人眼视觉：焦点
 
@@ -89,7 +89,7 @@ $$
 
 但是，视网膜的所有部分不是平等的，实际上视网膜正中央的一个特定区域，学名为“fovea”，中文名"黄斑窝"或者"中央凹"。这是视网膜中央部位的一个小凹陷，直径约为1.5毫米，它的特点是细胞密度最高，主要由视锥细胞构成，负责我们的中心视力和色彩视觉。当我们集中注意力看某个物体时，我们的眼睛会自动调整，使得光线尽可能地落在黄斑窝上，这样可以得到最清晰的视觉效果。
 
-![40](./assets/40.png)
+![40](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/40.png)
 
 从上图也可以看到，视网膜不同区域的敏感度不一样（或者可以表现为视力），越是边缘区，视力越差，在中央凹这里，视力达到最高
 
@@ -99,7 +99,7 @@ $$
 
 我们尝试将注意力机制抽象并且概括，将其用在更多类型的任务中，尝试得到一个通用的层，然后直接插入到RNN和CNN中进行使用，这种方法可以很好地对注意力机制进行重建
 
-![44](./assets/44.png)
+![44](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/44.png)
 
 我们的输入是一个查询向量（Query Vector，即$q$），这个将取代隐藏状态向量，查询向量的作用是帮助模型确定应该关注的输入数据的哪些部分，从而提高模型的性能和准确性。它是实现注意力机制的关键组件，使模型能够更好地处理复杂和大规模的数据。
 
@@ -109,11 +109,11 @@ $$
 
 然后就是使用softmax，对相似函数的输出进行处理，得到注意力权重，然后对输入向量进行加权来计算输出向量
 
-![45](./assets/45.png)
+![45](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/45.png)
 
 实际上，上面这种注意力机制中的相似函数$f_{att}$，是早期的工作，现在使用了更新的方法，也就是使用向量之间的简单点积，这样更有效而且性能更好
 
-![46](./assets/46.png)
+![46](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/46.png)
 
 同时为了限制相似性函数计算结果过大过小，我们使用缩放点积（如上图所示），来使得相似性有一个限定范围，这样就可以限制梯度不会过大，导致梯度爆炸（因为这个相似性会进入softmax进行计算的，这个值太大，也会导致反向的梯度很大，同时如果向量e中一个元素远大于其他元素，也会导致一个非常高的softmax峰值分布，导致梯度几乎在任何地方接近消失）
 
@@ -131,7 +131,7 @@ $$
 
 这里我们使用两个可学习的矩阵完成这个操作，一个是键矩阵$W_k$，另一个是值矩阵$W_v$
 
-![49](./assets/49.png)
+![49](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/49.png)
 
 我们这里使用查询向量和键矩阵来计算相似性，使用注意力权重矩阵和值向量来计算输出，这使得模型在如何正确使用其输入数据方面具有更大的灵活性
 
@@ -141,13 +141,13 @@ $$
 
 然后进行softmax操作，得到对齐分数，然后继续计算
 
-![55](./assets/55.png)
+![55](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/55.png)
 
 ## 自注意力层
 
 在之前的情况下，我们都是有两组输入：查询向量和输入向量，但是实际上我们只有一组向量作为输入，并且我们想将输入集中的每个向量与其他向量进行比较，所以我们需要将输入进行转换，我们再使用一个可学习的查询矩阵$W_Q$，来获得查询向量
 
-![62](./assets/62.png)
+![62](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/62.png)
 
 然后类似地，我们将使用键矩阵来获得键向量，然后计算查询向量和键向量之间的相似性矩阵$E$，然后使用softmax得到概率分布，加上值矩阵得到注意力权重矩阵，加权求和之后得到输出向量
 
@@ -155,7 +155,7 @@ $$
 
 我们想在视觉任务中使用注意力机制
 
-![80](./assets/80.png)
+![80](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/80.png)
 
 # 三种处理序列方法总结
 
@@ -187,7 +187,7 @@ transformer就是将自注意力作为比较输入向量的唯一机制，工作
 
 但是，归一化层不涉及不同向量之间的交互，仅仅是对单个向量完成归一化
 
-![91](./assets/91.png)
+![91](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/91.png)
 
 在这个归一化层之后，我们得到的还是一组向量，就是应该前馈的多层感知机，这是一个全连接的神经网络，会独立地对每个向量进行处理
 

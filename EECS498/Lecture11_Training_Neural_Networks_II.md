@@ -48,7 +48,7 @@
 
 所以我们需要找到一种非常好的学习率，使得网络既可以快速学习，也可以收敛到一个很好的状态，但是明显一个固定的学习率是无法完成这个任务的，我们需要使得学习率可以变化——先是较大的学习率，然后是更小的学习率
 
-![14](./assets/14-1683168009495-1.jpg)
+![14](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/14-1683168009495-1.jpg)
 
 实际上也有很多不同的学习率的设置方法
 
@@ -56,7 +56,7 @@
 
 步进式递减的方式，就是在某些节点上降低学习率，比如说ResNet这种，就是每三十轮训练就会学习率变为原来的十分之一（如图）
 
-![15](./assets/15-1683168605246-3.jpg)
+![15](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/15-1683168605246-3.jpg)
 
 可以看到，实际上每次步进后的第20-30个epoch，网络就会再次进入一个稳定状态，然后再一次进行学习率衰减，就可以重新进入一个相对快速的学习状态
 
@@ -66,7 +66,7 @@
 
 为了克服步进衰减的一些缺点，近年来余弦式衰减开始流行起来，使用一种余弦式函数来完成这个学习率衰减的过程
 
-![16](./assets/16-1683169550865-5.jpg)
+![16](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/16-1683169550865-5.jpg)
 
 这个方式的好处就是，只有两个参数需要设置（初始学习率$\alpha_0$，训练周期T），更加方便
 
@@ -74,13 +74,13 @@
 
 这种最简单，学习率进行线性下降
 
-![17](./assets/17-1683169843163-7.jpg)
+![17](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/17-1683169843163-7.jpg)
 
 ### 平方根倒数衰减
 
 这是2017年提出的一种方案，但是存在的缺陷是，模型实际上在最初的高学习率上花费的时间少，在后面的低学习率上花费较多时间，而其他的衰减方案往往在初始的高学习率上花费更多时间，容易导致最开始的时候模型收敛缓慢
 
-![18](./assets/18-1683170295513-9.jpg)
+![18](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/18-1683170295513-9.jpg)
 
 ### 总结
 
@@ -173,7 +173,7 @@
 
 我们选择一些关心的超参数集，对其中每一个超参数，我们选择一些想要评估的数值集（对数线性的方式），然后测试不同的组合，比如说权重衰减和学习率从10的-1次方到-4次方，然后进行组合和尝试
 
-![22](./assets/22.jpg)
+![22](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/22.jpg)
 
 但是这需要非常多次的尝试，需要非常多的算力，而且要调整的次数是超参数数量的指数倍，故这不是一种很好的方法
 
@@ -185,13 +185,13 @@
 
 如果我们考虑超参数对模型影响的边缘分布的话，可能会出现下面的情况
 
-![24](./assets/24-1683177789838-12.jpg)
+![24](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/24-1683177789838-12.jpg)
 
 某些对模型性能无关紧要的超参数与某些有影响的超参数一起网格搜索的话，会产生无用的计算，得到的信息中很多事无用信息（或者说我们无法得到重要类型超参数的更多有效样本），但是随机搜索的话，可以获得更多信息，则可以进行对比
 
 下面是讲师使用大量GPU对不同网络模型进行多次试验得到分布图
 
-![25](./assets/25-1683178826009-14.jpg)
+![25](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/25-1683178826009-14.jpg)
 
 ### 无大量GPU的方法
 

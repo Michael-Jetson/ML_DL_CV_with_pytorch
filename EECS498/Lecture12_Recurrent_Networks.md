@@ -22,7 +22,7 @@ CNN只有三部分，内部固定参数、输入、输出，即输入X，经过�
 
 但是RNN则不然，多了一个内部隐藏状态（或者叫内部状态），每一次输入之后，都会使用某种公式来更新这个状态，可以使用一个递归公式给出
 
-![16](./assets/16-1683192701565-16.jpg)
+![16](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/16-1683192701565-16.jpg)
 
 其可以处理任意长度的序列，处理时间看序列中包含元素的个数，其处理的计时单位是时间步，一个时间步处理一个元素，但是循环网络和权重都是相同的
 
@@ -30,7 +30,7 @@ CNN只有三部分，内部固定参数、输入、输出，即输入X，经过�
 
 - 多对多的情况下，需要为序列中的每个点做出决定，类似于视频分类，我们需要为视频中的每一帧进行分类，这时候我们可以加上另一个权重矩阵$W_Y$，使得我们可以输出Y，然后处理得到标签$L_n$来进行预测，然后我们也可以在每一个时间步上应用损失函数来训练我们的模型：每个时间步的损失加在一起就是最终损失，然后就可以进行反向传播
 
-  ![25](./assets/25-1683202714694-22.jpg)
+  ![25](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/25-1683202714694-22.jpg)
 
 - 多对一的情况下，我们最终产生一个标签，比如说我们想对这整个视频序列做一个分类，那么我们可以连接我们的模型，在序列的最后做一个预测
 
@@ -38,13 +38,13 @@ CNN只有三部分，内部固定参数、输入、输出，即输入X，经过�
 
 这是一个简单的循环神经网络
 
-![17](./assets/17-1683192919272-18.jpg)
+![17](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/17-1683192919272-18.jpg)
 
 ## RNN计算图
 
 我们以计算图的方式思考RNN是怎么工作的
 
-![22](./assets/22-1683193115863-20.jpg)
+![22](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/22-1683193115863-20.jpg)
 
 我们首先给定一个初始状态$h_0$，然后不断在输入中进行更新，每一次我们都将状态和输入提供给递归关系函数，然后输出第一个隐藏状态，依次递归
 
@@ -64,13 +64,13 @@ Seq2Seq模型通常由两个主要组件构成：编码器（Encoder）和解码
 
 在训练的时候，我们使用独热向量来对输入序列进行编码，每个元素（一个字符）变成一个独热向量，然后输入到循环神经网络中进行处理，并且改变序列隐藏状态，然后我们就可以使用矩阵来预测每个点的词汇表中元素的分布，因为网络的任务是在每个时间点都试图预测序列中的下一个元素
 
-![32](./assets/32.jpg)
+![32](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/32.jpg)
 
 如果已经有了一个训练有素的语言模型，可以用来生成新文本（以它学习到的文本的风格），这个过程是这样的
 
 我们先给与一个初始种子（initial seed token，在这里给的是字符h），然后让网络生成以种子为条件的新文本，其工作方式将给予的种子转化为独热向量，然后得到对下一个字符的预测分布，然后采样出最有可能的字符，将其作为下一个时间步的输入，如此反复即可
 
-![40](./assets/40.jpg)
+![40](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/40.jpg)
 
 # 训练方法
 
@@ -84,13 +84,13 @@ BPTT（back-propagation through time）算法是常用的训练RNN的方法，�
 
 也就是说，我们每给一块序列提供一个输入，得到输出之后就可以计算损失，然后就对这块序列进行训练
 
-![46](./assets/46.jpg)
+![46](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/46.jpg)
 
 这样就可以携带隐藏状态一直向前，但是只会在某些时间步上进行反向传播，大大减小了训练难度
 
 ## 训练案例：莎士比亚作品集
 
-![53](./assets/53.jpg)
+![53](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/53.jpg)
 
 这是将莎士比亚某个作品中的一段作为数据集进行训练的，可以看到，最开始就是胡言乱语，但是最后可以有逻辑的进行生成文本
 
@@ -108,17 +108,17 @@ BPTT（back-propagation through time）算法是常用的训练RNN的方法，�
 
 然后，我们需要以某种方式将来自卷积神经网络的数据连接到循环神经网络，或者说，我们将卷积网络输出的特征向量$v$与矩阵$W_{ih}$相乘，进行一次线性变换，然后使用隐藏状态和序列当前元素，结合在一起使用tanh函数进行压缩，然后不断进行处理，直至另一个特殊标记end出现为止
 
-![77](./assets/77.jpg)
+![77](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/77.jpg)
 
 所以无论我们处理的有限长度序列是什么，将这两个额外的特殊标记添加到词汇表中是很常见的，一个称为开始标记，我们放在每个序列的开头，另一个称为结束标记，代表序列的结束
 
 至于实际效果，总的来说还是很不错的，模型输出的不只是猫、狗、卡车这种单一标签，而是一连串的单词
 
-![79](./assets/79.jpg)
+![79](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/79.jpg)
 
 但这些图像字幕模型实际上并没有那么聪明
 
-![80](./assets/80.jpg)
+![80](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/80.jpg)
 
 比如说第一张图片，它说一个女人手里拿着一只猫，因为不知何故，女人外套的质地可能看起来有点像猫毛的质地，或者左下角图片中的把人拿着苹果手机认作人使用鼠标，或者中间图片的把一个倒立的人认作人拿着冲浪板
 
@@ -126,7 +126,7 @@ BPTT（back-propagation through time）算法是常用的训练RNN的方法，�
 
 循环神经网络也是使用梯度进行训练的，那么自然也会有这方面的问题
 
-![85](./assets/85.jpg)
+![85](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/85.jpg)
 
 首先我们知道，在这个神经网络中我们是使用tanh函数进行非线性传递的，那么其反向传播的时候，tanh就会出现一些不好的情况
 
@@ -163,7 +163,7 @@ LSTM的特点是，具有两个不同的隐藏向量，分别代表长时间记�
 
 实际上第一篇LSTM论文是1997年发表的，但是近年来才开始热门起来，成为最常见的循环神经网络之一
 
-![91](./assets/91.jpg)
+![91](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/91.jpg)
 
 在LSTM中，我们接受输入向量X和状态向量H，然后使用权重矩阵W进行线性映射，然后将输出分为四个不同向量，每个向量的大小为h，h是隐藏单元中元素数量，这也称为四个门（如图所示），而普通的循环神经网络则是矩阵乘法输出就是下一个隐藏状态，然后使用非线性函数进行输出
 
@@ -176,7 +176,7 @@ LSTM的特点是，具有两个不同的隐藏向量，分别代表长时间记�
 
 LSTM单个单元的数据传递方式如下
 
-![93](./assets/93-1683296726213-6.jpg)
+![93](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/93-1683296726213-6.jpg)
 
 一个很好的地方在于，Cell中只有加法和数乘，这对于梯度的反向传播是一个非常好的改进，便于LSTM在学习过程中保持信息流
 
@@ -184,7 +184,7 @@ Cell状态常被认为是一种LSTM的私有变量
 
 LSTM某种意义上类似于ResNet，ResNet可以有数百层的深度，可以看到通过添加跨越不同层和深度卷积的连接的方式，来提供跨越多层的不间断梯度流
 
-![96](./assets/96.jpg)
+![96](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/96.jpg)
 
 比如说我们有一连串的LSTM单元连接在一起，然后沿着序列进行处理，那么通过所有的细胞状态（Cell State）的上层路径形成了一条不间断的梯度高速公路，信息可以沿着这条高速公路非常容易地通过，这样，LSTM就可以长时间记住东西了
 
@@ -192,7 +192,7 @@ LSTM某种意义上类似于ResNet，ResNet可以有数百层的深度，可以�
 
 我们已经看到了对于处理图像的CNN来说，更多层通常性能更好，更多层通常允许模型在使用的任务上性能更好，所以我们自然而然的想到，我们能不能使用类似的方法来在RNN上堆叠不同的层，这也就是**多层循环神经网络**或者**深度循环神经网络**，一般是在隐藏状态序列之上应用另一个递归神经网络来做到这一点（如图所示）
 
-![99](./assets/99.jpg)
+![99](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/99.jpg)
 
 在这里，我们有一个循环神经网络来处理原始输入序列，产生隐藏状态序列，然后隐藏状态序列被当做另一个循环神经网络的输入序列，然后产生第二个隐藏状态序列，如此循环多次；但是一般来说，循环神经网络的深度没有CNN那么深
 
