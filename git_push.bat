@@ -1,0 +1,6 @@
+git add .
+@echo off
+set /p commits=«Î ‰»Îcommits:
+git commit -m "%commits%"
+git push rc master
+pause
