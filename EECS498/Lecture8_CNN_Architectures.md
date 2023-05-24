@@ -4,6 +4,8 @@
 
 这节课的内容就是构建了一整个卷积神经网络来实现图像分类，并且介绍了CNN发展的历史（2012-2019）并且分析了不同的CNN架构
 
+同时，本人会附上PyTorch的代码，大家可以自行学习
+
 ## CNN历史：ImageNet挑战赛的发展
 
 ## AlexNet
@@ -19,6 +21,93 @@ AlexNet的架构如下
 
 ![](./assets/eecs8-31.jpg)
 Alexnet 早期卷积层需要较多的内存开销，且相比全连接层需要更多的浮点数计算；全连接层占用的参数远大于卷积层，且展开后的第一个全连接层需要的参数最多。
+
+不过AlexNet为什么使用两层全连接层，李沐老师的解释是前面卷积层提取的特征不够深，需要两个全连接层来继续深化，如果只使用一个全连接层那么效果会变差
+
+AlexNet的代码如下
+
+```python
+# 导入pytorch库
+import torch
+# 导入torch.nn模块
+from torch import nn
+# nn.functional：(一般引入后改名为F)有各种功能组件的函数实现，如：F.conv2d
+import torch.nn.functional as F
+ 
+# 定义AlexNet网络模型，继承于父类nn.Module
+class AlexNet(nn.Module):
+    # 子类继承中重新定义Module类的__init__()和forward()函数
+    # init()：进行初始化，申明模型中各层的定义
+    def __init__(self):
+        # super：引入父类的初始化方法给子类进行初始化
+        super(MyAlexNet, self).__init__()
+        # 二维卷积层，输入大小为224*224，输出大小为55*55，输入通道为3，输出为96，卷积核为11，步长为4
+        self.c1 = nn.Conv2d(in_channels=3, out_channels=96, kernel_size=11, stride=4, padding=2)
+        # 使用ReLU作为激活函数，当然也可以使用Sigmoid函数等
+        self.ReLU = nn.ReLU()
+        # MaxPool2d：最大池化操作
+        # 二维最大池化层，输入大小为55*55，输出大小为27*27，输入通道为96，输出为96，池化核为3，步长为2
+        self.s1 = nn.MaxPool2d(kernel_size=3, stride=2)
+        # 卷积层，输入大小为27*27，输出大小为27*27，输入通道为96，输出为256，卷积核为5，扩充边缘为2，步长为1
+        self.c2 = nn.Conv2d(in_channels=96, out_channels=256, kernel_size=5, stride=1, padding=2)
+        # 最大池化层，输入大小为27*27，输出大小为13*13，输入通道为256，输出为256，池化核为3，步长为2
+        self.s2 = nn.MaxPool2d(kernel_size=3, stride=2)
+        # 卷积层，输入大小为13*13，输出大小为13*13，输入通道为256，输出为384，卷积核为3，扩充边缘为1，步长为1
+        self.c3 = nn.Conv2d(in_channels=256, out_channels=384, kernel_size=3, stride=1, padding=1)
+        # 卷积层，输入大小为13*13，输出大小为13*13，输入通道为384，输出为384，卷积核为3，扩充边缘为1，步长为1
+        self.c4 = nn.Conv2d(in_channels=384, out_channels=384, kernel_size=3, stride=1, padding=1)
+        # 卷积层，输入大小为13*13，输出大小为13*13，输入通道为384，输出为256，卷积核为3，扩充边缘为1，步长为1
+        self.c5 = nn.Conv2d(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1)
+        # 最大池化层，输入大小为13*13，输出大小为6*6，输入通道为256，输出为256，池化核为3，步长为2
+        self.s5 = nn.MaxPool2d(kernel_size=3, stride=2)
+        # Flatten()：将张量（多维数组）平坦化处理，神经网络中第0维表示的是batch_size，所以Flatten()默认从第二维开始平坦化
+        self.flatten = nn.Flatten()
+        # 全连接层
+        # Linear（in_features，out_features）
+        # in_features指的是[batch_size, size]中的size,即样本的大小
+        # out_features指的是[batch_size，output_size]中的output_size，样本输出的维度大小，也代表了该全连接层的神经元个数
+        self.f6 = nn.Linear(6*6*256, 4096)
+        self.f7 = nn.Linear(4096, 4096)
+        # 全连接层&softmax
+        self.f8 = nn.Linear(4096, 1000)
+        self.f9 = nn.Linear(1000, 2)
+ 
+    # forward()：定义前向传播过程,描述了各层之间的连接关系
+    def forward(self, x):
+        x = self.ReLU(self.c1(x))
+        x = self.s1(x)
+        x = self.ReLU(self.c2(x))
+        x = self.s2(x)
+        x = self.ReLU(self.c3(x))
+        x = self.ReLU(self.c4(x))
+        x = self.ReLU(self.c5(x))
+        x = self.s5(x)
+        x = self.flatten(x)
+        x = self.f6(x)
+         # Dropout：随机地将输入中50%的神经元激活设为0，即去掉了一些神经节点，防止过拟合
+        # “失活的”神经元不再进行前向传播并且不参与反向传播，这个技术减少了复杂的神经元之间的相互影响
+        x = F.dropout(x, p=0.5)
+        x = self.f7(x)
+        x = F.dropout(x, p=0.5)
+        x = self.f8(x)
+        x = F.dropout(x, p=0.5)
+        x = self.f9(x)
+        return x
+ 
+# 每个python模块（python文件）都包含内置的变量 __name__，当该模块被直接执行的时候，__name__ 等于文件名（包含后缀 .py ）
+# 如果该模块 import 到其他模块中，则该模块的 __name__ 等于模块名称（不包含后缀.py）
+# “__main__” 始终指当前执行模块的名称（包含后缀.py）
+# if确保只有单独运行该模块时，此表达式才成立，才可以进入此判断语法，执行其中的测试代码，反之不行
+if __name__ == '__main__':
+    # rand：返回一个张量，包含了从区间[0, 1)的均匀分布中抽取的一组随机数，此处为四维张量
+    x = torch.rand([1, 3, 224, 224])
+    # 模型实例化
+    model = MyAlexNet()
+    y = model(x)
+```
+
+
+
 ## ZF Net
 ![](./assets/eecs9-33.png)
 
@@ -32,7 +121,7 @@ ZFNet的第一层使用两倍的下采样因子（步长为2），相比于AlexN
 
 VGG网络带来的启示就是，没必要直接使用更大的卷积核，可以使用多个更小的卷积核来代替，比如说一个5x5的卷积核，就可以使用两次3x3卷积来代替
 
-VGG的设计比较标准，或者说架构设计上比较有原则
+VGG的设计比较标准，或者说架构设计上比较有原则，非常有规则（不像AlexNet那样不规则）
 
 其设计原则是，所有卷积层的卷积核大小都为3x3步幅为1填充为1，所有池化层的都是2x2的最大池化层且步幅为2，池化层之后会将通道数量加倍
 
