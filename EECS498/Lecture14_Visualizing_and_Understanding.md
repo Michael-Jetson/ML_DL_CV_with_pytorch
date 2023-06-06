@@ -31,7 +31,7 @@
 
 随着神经元层数的加大，所寻找的特征也越来越语义化，或者说神经元的语义信息越来越明显了（如下图所示），或者可以说神经元越来越有选择性了，我们可以这样理解：高层的神经元都是一个简易的物体检测器，可以检测特定的物体是否存在
 
-![20](./assets/20.png)
+![20](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/20.png)
 
 ![6](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/6.jpg)
 
@@ -63,7 +63,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们使用类似的方法，我们准备了一个20万张混合了物体和场景的图像数据集，然后分别在ImageNet和places数据集上训练网络，这两个网络都没有看过这二十万张图片，然后我们将这个数据集放入两个网络，并且记录每一层每个神经元的响应，并且进行和图片的相关性分析，然后就可以估计神经元所喜欢的模式及其感受野
 
-![17](./assets/17.png)
+![17](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/17.png)
 
 ## 降维方法可视化
 
@@ -119,23 +119,39 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们准备了一些图片，并且通过某些方法抹去图片中的一小块区域（比如说11x11大小的一个正方形），然后将修改的图片和原图都放入神经网络，并且记录神经元的响应，看哪些区域跟原图的响应有区别，就说明这些区域对某个神经元的响应有重要影响，这样就可以得到一个map，表示图片中哪些区域对神经元最重要（下图中上方左数第二个）每一个图都这样处理和记录，然后将其对齐，移动到图像中心，就可以得到一个神经元的感受野
 
-![18](./assets/18.png)
+![18](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/18.png)
 
 我们对每一层每个神经元都这样处理和记录，就可以得到其感受野，比如说上图中下方的示意图，我们发现，越高层的神经元感受野越大，并且不同神经元的感受野会有不一样的形状，此外，神经元的实际感受野比理论上的感受野要小（黄色区域是理论感受野，橙色区域是实际估计出的感受野，大概实际感受野的大小是理论感受野的四分之一）
 
 这种方法也有应用，可以利用神经元的响应去完成定位和分割
 
-![19](./assets/19-1685801717785-4.png)
+![19](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/19-1685801717785-4.png)
 
 当然还有一些关于感受野的其他工作，比如说可以使用高斯分布去拟合感受野大小（上图），并且进行了理论证明
 
 我们使用这种方法，去查看神经元更喜欢什么样的特征，下面是基于某个训练好的模型上，第五个pool层的某个神经元，其实这个神经元就在寻找海洋或者海岸的特征
 
-![22](./assets/22.png)
+![22](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/22.png)
 
 当然这种方法，有时候也会被外观接近的不同类别的个体所影响，比如下图中，神经元在寻找台球桌（下图中上半部分）的过程中，就会被类似于台球桌的游泳池（下图中下半部分，红色框中）所干扰
 
-![25](./assets/25.png)
+![25](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/25.png)
+
+## 类激活映射（Class Activation Mapping）
+
+类激活映射（CAM）是一种用于可视化卷积神经网络中类别特定激活区域的方法。它能够帮助我们理解CNN在图像分类任务中对不同类别的判别性区域。
+
+CAM的基本原理是在CNN最后一个卷积层之后添加全局平均池化层，然后通过权重的线性组合将特征图映射到类别得分，这样就将最后的预测层和最后一个卷积层直接联系起来了，最后一层卷积层得到的是检测器（也就是不同的神经元）检测的结果，然后乘以权重，就得到了一个**类激活图（Class Activation Map）**。通过反向传播，可以获得特征图中每个空间位置对于每个类别得分的重要性权重。
+
+![44](./assets/44-1685845535305-9.png)
+
+CAM可视化结果表示为热度图，将特定类别的重要激活区域以高亮显示。这些激活区域通常与输入图像中属于该类别的判别性区域相关联。CAM的目的是提供一种直观的方式来理解CNN在图像分类中的决策依据，并可用于可视化模型的关注区域。类激活映射在计算机视觉领域被广泛应用于解释和分析卷积神经网络模型的分类能力。
+
+![45](./assets/45-1685845922393-11.png)
+
+对于不同的结果，都可以生成不同的激活图，同时我们发现，使用全局平均池化层代替全连接层之后，预测精度只有极小幅度下降（2-3%），但是参数量大大减小，并且可以通过增加一两个卷积层的方式去提高网络的拟合能力，使得精度恢复
+
+![46](./assets/46-1685846173069-13.png)
 
 ## 通过遮挡方式的显著性可视化
 
@@ -225,9 +241,9 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 ![34](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/34.jpg)
 
-不过，所选的梯度上升的神经元越高层，生成的图像就更有语义，如下图所示
+不过，所选的用于梯度上升的神经元越高层，生成的图像就更有语义，如下图所示
 
-![33](./assets/33.png)
+![33](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/33.png)
 
 这种研究方向的初衷是为了理解神经网络实际上在寻找什么，讲师Justin博士认为，越执着于强大的正则化器来寻找这些最大激活图像，就越会误入歧途，所以当他看到这样精美的图像时，很难说其中有多少是卷积神经网络实际正在寻找的；他倾向于使用简单的正则化器，认为这样才可以更纯粹地了解卷积神经网络在寻找什么样的原始图像和特征
 
@@ -259,7 +275,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 在最开始的时候，我们发现，生成的图像与输入图像非常接近，几乎一致，意味着基本上所有的图像信息都被浅层神经元捕获，当层数增多，我们再反转的时候，我们发现越来越多的低级信息（局部的纹理和颜色这些）开始丢失，但是保留了图像的整体结构或者形状
 
-![38](./assets/38-1683887580865-28.jpg)
+![38](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/38-1683887580865-28.jpg)
 
 特征反转为我们提供了一种直观的方法，去理解神经网络中的每一层在图像识别过程中的作用，从而有助于我们更好地理解和改进神经网络模型。
 
@@ -277,13 +293,13 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 所以，当我们说DeepDream生成的是神经网络的“梦境”，实际上是指这个图像反映了网络在识别和解释世界时所学习到的特征。
 
-![47](./assets/47.jpg)
+![47](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/47.jpg)
 
 ## 纹理合成
 
 我们知道，计算机图形学里面有纹理合成的任务，我们想要做的是输入一些小图像块，提供一些规则纹理，然后我们想要生成一些文本，一些输出图像，这些图像可能要大得多（如下图所示），这个可以使用一些经典算法完成
 
-![51](./assets/51.jpg)
+![51](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/51.jpg)
 
 实证明我们实际上可以不用神经网络就可以做出很好的纹理合成，只要我们的纹理很简单，但是我们也可以使用神经网络来实现纹理合成，也就是使用梯度反传来解决纹理合成任务（类似于特征反转）
 
@@ -293,7 +309,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们选择神经网络的某个层，然后通过网络运行我们的纹理图像我们的目标图像，并且提取这个特征表示，对这些特征表示计算格拉姆矩阵，这将捕捉到图像中的纹理信息，这是因为网络的每一层都会输出一个特征图，这个特征图就是这一层的特征表示。这些特征图会随着网络层次的深入而逐渐从捕捉简单特征（或者说更细粒度的纹理特征或者低级特征）转向捕捉复杂特征（或者说更抽象的纹理特征），可以选择其中的一层或多层来提取特征表示。
 
-![55](./assets/55-1683899985297-3.jpg)
+![55](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/55-1683899985297-3.jpg)
 
 选择的特征表示通常是一个形状为(C, H, W)的三维张量，其中C是通道数量，H和W分别是特征图的高和宽。为了计算格拉姆矩阵，你首先需要将这个3D张量转换为一个2D矩阵，形状为(C, H*W)，你可以通过reshape或flatten操作来实现这一步。然后，你计算这个2D矩阵与其自身的转置的乘积，得到的就是格拉姆矩阵，其形状为(C, C)。每个元素都是相应两个通道的特征向量的内积，可以被理解为这两个特征在图像中的相关性或共现度。
 
