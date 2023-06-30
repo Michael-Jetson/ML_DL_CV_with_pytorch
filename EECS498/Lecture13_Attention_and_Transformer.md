@@ -203,6 +203,8 @@ $$
 
 在处理非常长的序列的时候，那么这将允许模型进行某种程度的转移注意力，将注意力集中在输入的不同部分，以此产生输出
 
+![lhy_attention_37](./assets/lhy_attention_37.png)
+
 同时，RNN是没办法并行计算的，这对模型的学习速度是一个很大的限制，但是Self-Attention是可以使用GPU进行并行计算的，这样就比RNN更容易训练，所以，现在RNN逐步被Self-Attention取代
 
 ## 例子
@@ -259,7 +261,17 @@ $$
 
 # 注意力机制下的图神经网络（GNN）
 
-当然，注意力机制还可以使用在图
+当然，注意力机制还可以使用在图神经网络上
+
+在前面，我们使用注意力机制去寻找不同向量之间的关联性，但是在图网络这里，节点之间的关联性是直接给你的，所以在这里只需要去计算有边相连的节点就可以
+
+![lhy_attention_39](./assets/lhy_attention_39.png)
+
+# Transformer
+
+Transformer是一种使用了注意力机制的Seq2Seq的模型，主要特点就是它全面使用了注意力机制，而不是传统的循环神经网络（RNN）或卷积神经网络（CNN）结构，来处理序列中的依赖关系
+
+在Transformer模型中，注意力机制被用于所有的输入和输出之间，这允许模型在任何两点之间都可以直接交互，从而处理复杂的依赖关系。此外，Transformer模型使用了多头注意力（Multi-Head Attention）结构，允许模型从不同的表示子空间同时学习输入之间的交互，进一步增强了模型的表达能力。
 
 # 注意力机制的通用化：注意力层
 
@@ -324,6 +336,12 @@ $$
 我们想在视觉任务中使用注意力机制
 
 ![80](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/80.png)
+
+## Transformer的变形
+
+Transformer有很多变形，下图中的论文就总结了一些，而且因为Transformer计算量大，所以未来一个研究方向就是减小其计算量，提高计算速度
+
+![lhy_attention_41](./assets/lhy_attention_41.png)
 
 # 三种处理序列方法总结
 
