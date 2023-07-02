@@ -3,11 +3,13 @@
 
 # CS231n课程笔记翻译：神经网络笔记3（上） - 知乎专栏
 
-![CS231n课程笔记翻译：神经网络笔记3（上）][4]
+![CS231n课程笔记翻译：神经网络笔记3（上）]( https://pic3.zhimg.com/b629f243297cf32d2507bdaa1bc38e12_r.jpg)
 
 # CS231n课程笔记翻译：神经网络笔记3（上）
 
-![杜客][5][杜客][6]
+![杜客](https://pic2.zhimg.com/5ab5b93bd_xs.jpg)
+
+[杜客][https://www.zhihu.com/people/du-ke]
 
 8 months ago
 
@@ -94,13 +96,13 @@
 
 **使用中心化公式。**在使用有限差值近似来计算数值梯度的时候，常见的公式是：
 
-![displaystyle frac{df\(x\)}{dx}=frac{f\(x+h\)-f\(x\)}{h}\(bad, do not use\)][11]  
+![displaystyle frac{df\(x\)}{dx}=frac{f\(x+h\)-f\(x\)}{h}\(bad, do not use\)](http://zhihu.com/equation?tex=%5Cdisplaystyle+%5Cfrac%7Bdf%28x%29%7D%7Bdx%7D%3D%5Cfrac%7Bf%28x%2Bh%29-f%28x%29%7D%7Bh%7D%28bad%2C%5C+do%5C+not%5C+use%29] )
 
 其中![h][12]是一个很小的数字，在实践中近似为1e-5。在实践中证明，使用_中心化_公式效果更好：  
 
-![displaystyle frac{df\(x\)}{dx}=frac{f\(x+h\)-f\(x-h\)}{2h}\(use instead\)][13]  
+![displaystyle frac{df\(x\)}{dx}=frac{f\(x+h\)-f\(x-h\)}{2h}\(use instead\)](http://zhihu.com/equation?tex=%5Cdisplaystyle+%5Cfrac%7Bdf%28x%29%7D%7Bdx%7D%3D%5Cfrac%7Bf%28x%2Bh%29-f%28x-h%29%7D%7B2h%7D%28use%5C+instead%29)
 
-该公式在检查梯度的每个维度的时候，会要求计算两次损失函数（所以计算资源的耗费也是两倍），但是梯度的近似值会准确很多。要理解这一点，对![f\(x+h\)][14]和![f\(x-h\)][15]使用泰勒展开，可以看到第一个公式的误差近似![O\(h\)][16]，第二个公式的误差近似![O\(h^2\)][17]（是个二阶近似）。_**（译者注：泰勒展开相关内容可阅读《高等数学》第十二章第四节：函数展开成幂级数。）**_
+该公式在检查梯度的每个维度的时候，会要求计算两次损失函数（所以计算资源的耗费也是两倍），但是梯度的近似值会准确很多。要理解这一点，对$f(x+h)$和$f(x-h)$使用泰勒展开，可以看到第一个公式的误差近似![O\(h\)][16]，第二个公式的误差近似![O\(h^2\)][17]（是个二阶近似）。_**（译者注：泰勒展开相关内容可阅读《高等数学》第十二章第四节：函数展开成幂级数。）**_
 
 **使用相对误差来比较**。比较数值梯度![f'_n][18]和解析梯度![f'_a][19]的细节有哪些？如何得知此两者不匹配？你可能会倾向于监测它们的差的绝对值![|f'_a-f'_n|][20]或者差的平方值，然后定义该值如果超过某个规定阈值，就判断梯度实现失败。然而该思路是有问题的。想想，假设这个差值是1e-4，如果两个梯度值在1.0左右，这个差值看起来就很合适，可以认为两个梯度是匹配的。然而如果梯度值是1e-5或者更低，那么1e-4就是非常大的差距，梯度实现肯定就是失败的了。因此，使用_相对误差_总是更合适一些：  
 
@@ -270,11 +272,9 @@
 
 ![][32]将神经网络第一层的权重可视化的例子。**左图**中的特征充满了噪音，这暗示了网络可能出现了问题：网络没有收敛，学习率设置不恰当，正则化惩罚的权重过低。**右图**的特征不错，平滑，干净而且种类繁多，说明训练过程进行良好。
 
-  
+  # 代码实现
 
-————————————————————————————————————————
-
-**神经网络笔记3 （上）结束。**  
+前面是一系列的理论部分，接下来我们介绍如何使用代码完成这些操作
 
 ## 译者反馈
 
@@ -290,18 +290,11 @@
 [1]: https://pic4.zhimg.com/4a97d93d652f45ededf2ebab9a13f22b_m.jpeg
 [2]: https://zhuanlan.zhihu.com/intelligentunit
 [3]: https://zhuanlan.zhihu.com/write
-[4]: https://pic3.zhimg.com/b629f243297cf32d2507bdaa1bc38e12_r.jpg
-[5]: https://pic2.zhimg.com/5ab5b93bd_xs.jpg
-[6]: https://www.zhihu.com/people/du-ke
 [7]: http://link.zhihu.com/?target=http%3A//cs231n.github.io/neural-networks-3/
 [8]: http://link.zhihu.com/?target=http%3A//cs.stanford.edu/people/karpathy/
 [9]: https://www.zhihu.com/people/kun-kun-97-81
 [10]: https://www.zhihu.com/people/hmonkey
-[11]: http://zhihu.com/equation?tex=%5Cdisplaystyle+%5Cfrac%7Bdf%28x%29%7D%7Bdx%7D%3D%5Cfrac%7Bf%28x%2Bh%29-f%28x%29%7D%7Bh%7D%28bad%2C%5C+do%5C+not%5C+use%29
 [12]: http://zhihu.com/equation?tex=h
-[13]: http://zhihu.com/equation?tex=%5Cdisplaystyle+%5Cfrac%7Bdf%28x%29%7D%7Bdx%7D%3D%5Cfrac%7Bf%28x%2Bh%29-f%28x-h%29%7D%7B2h%7D%28use%5C+instead%29
-[14]: http://zhihu.com/equation?tex=f%28x%2Bh%29
-[15]: http://zhihu.com/equation?tex=f%28x-h%29
 [16]: http://zhihu.com/equation?tex=O%28h%29
 [17]: http://zhihu.com/equation?tex=O%28h%5E2%29
 [18]: http://zhihu.com/equation?tex=f%27_n

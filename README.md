@@ -32,7 +32,12 @@
 
 参考书：周志华《机器学习》，李航《统计学习方法》
 
-参考课程：密歇根大学公开课EECS498（主讲人也是是CS231n的主讲人Justin博士）
+参考资料：
+
+- 密歇根大学公开课EECS498（主讲人也是是CS231n的主讲人Justin博士）
+- [理解和利用CNN的内部表征 TechBeat 周博磊][https://www.techbeat.net/talk-info?id=180]
+- [点云上的深度学习及其在三维场景理解中的应用][https://www.techbeat.net/talk-info?id=254]
+- 
 
 ## 2023.6.4更新情况
 
