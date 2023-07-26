@@ -16,6 +16,7 @@
 ├── Jupyter
 ├── obsidian
 ├── pytorch_image_classification
+├── GAMES101Notes
 └── scripts
 ```
 
@@ -29,6 +30,7 @@
 - pytorch_image_classification是一个基于pytorch的图像分类数据集
 - scripts是随意编写的Python脚本
 - img_cls是一个使用不同网络进行图像分类的简单项目，个人感觉这是一个很标准的小项目
+- GAMES101Notes是UCSB闫令琪主讲的现代计算机图形学入门课程的笔记
 
 参考书：周志华《机器学习》，李航《统计学习方法》
 
