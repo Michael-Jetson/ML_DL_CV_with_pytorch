@@ -5,11 +5,11 @@
 
 如图，蜗牛的旋转速度在不断的变化 (发的是一张静态图片，动态去尾部Reference的课程链接中找)，并不是以固定速度旋转的。
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p0.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p0.png" title="" alt="" data-align="center">
 
 # 2. 向量/矢量 (Vectors)
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p1.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p1.png" title="" alt="" data-align="center">
 
 - 向量的书写方式有很多种，可以写成$\vec{a}$，也可以写成$\bold{a}$。除此之外，如果知道起始点(A)坐标和结束点(B)坐标，也可以用两者的坐标差($\vec{AB}=B-A$)来表示。
 
@@ -23,7 +23,7 @@
 
 # 3. 向量/矢量相加 (Vector Addition)
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p2.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p2.png" title="" alt="" data-align="center">
 
 - 几何直观上：平行四边形法则和三角形法则（平行四边形法则可以通过平移转化为三角形法则，只需要做到相加的向量首尾相连即可，最终利用完全相连后的初始和结束位置得到向量）。
 
@@ -31,7 +31,7 @@
 
 - 向量在坐标系下的表示（笛卡尔坐标系内，在坐标系中表示的原因是方便计算向量长度）
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p3.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p3.png" title="" alt="" data-align="center">
 
 - 图中，X和Y分别是横轴和纵轴的单位向量，现在用这两个单位向量来表示向量$\vec{A}$ (如果没有特殊说明，向量默认是列向量表示)
   
@@ -45,7 +45,7 @@
 
 ## 4.1 点乘 (Dot(scalar) Product)
 
-<img src="file:///C:/Users/15308/AppData/Roaming/marktext/images/2023-07-26-22-20-50-image.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p4.png" title="" alt="" data-align="center">
 
 - 计算公式（得到的是一个数值）：$\vec{a}\cdot\vec{b}=||a||||b||\cos\theta$
 
@@ -91,15 +91,15 @@
   
   - 取得投影后，就可以将$\vec{b}$进一步分解出一个垂直于$\vec{a}$的法线向量$\vec{b}-\vec{b}_\bot$。
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p5.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p5.png" title="" alt="" data-align="center">
 
 - 图形学中点乘的应用2：向量的点乘会告诉向量之间方向的一致性和接近程度，根据$\\cos\theta$来看，如果最终得出来点乘的结果<0，说明两向量方向基本相反（$\vec{a}$和$\vec{c}$）；如果最终的出来点乘的结果>0，说明两向量方向基本一致（$\vec{a}$和$\vec{b}$）；如果最终结果=0，说明两向量垂直。接近程度的话用点乘（先各自转化为方向向量再去点乘）得到的值和1/-1的接近程度就可以表示，这里不做过多描述。
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p6.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p6.png" title="" alt="" data-align="center">
 
 ## 4.2 叉乘 (Cross(vector) product)
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p7.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p7.png" title="" alt="" data-align="center">
 
 - 长度计算公式：$||a×b||=|||a|||b||\sin\phi$
 
@@ -147,11 +147,11 @@
 
 - 图形学中叉乘的作用1：判断左/右，下图处于一个三维空间中的直角坐标系，$\vec{a}$和$\vec{b}$同在xoy平面内。如果$\vec{a}×\vec{b}$的结果为正，即与z轴正方向相同，说明$\vec{a}$在$\vec{b}$的右边；如果结果为负，即与z轴反方向相同，说明$\vec{a}$在$\vec{b}$的左边。
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p8.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p8.png" title="" alt="" data-align="center">
 
 - 图形学中叉乘的作用2：判断内/外，下图中，无论是$\vec{AB}×\vec{AP}$，$\vec{BC}×\vec{BP}$，还是$\vec{CA}×\vec{CP}$，结果都能证明P点位于AB，BC和CA这三条边的左侧，说明P点位于三角形内。（注：无论三角形三个点的顺序如何排列，判断标准都是P点是否在三条边的同一侧，拓展到光栅化，通过计算三角形覆盖了哪些像素点来给像素着色；若计算结果为0，则人为自行决定点的归属）
 
-<img src="file:///D:/Yuque/Games101notes/Lecture02/Lec02_p9.png" title="" alt="" data-align="center">
+<img src="https://github.com/Michael-Jetson/ML_DL_CV_with_pytorch/blob/main/GAMES101Notes/Lecture02/Lec02_p9.png" title="" alt="" data-align="center">
 
 ## 4.3 正交标准坐标系 (orthonmormal frame)
 
