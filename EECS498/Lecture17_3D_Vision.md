@@ -22,7 +22,7 @@
 
 三维视觉的内容不仅仅是完成分类分割，实际上还有更多的相关主题（很多主题并不是基于深度学习方法的），这是因为三维视觉会涉及对象和世界的三维结构
 
-![6](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_7.jpg)
+![6](./assets/EECS498_L17_7.jpg)
 
 我们可能有这样一直想法，就是我们想输入一个视频序列，这是一个二维图像帧序列，然后我们想通过视频，预测或者重建摄像机穿过三维世界的轨迹
 
@@ -34,7 +34,7 @@
 
 下图中展示了五种表达方式，每一种都是相同底层三维形状的不同表示
 
-![7](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_8.jpg)
+![7](./assets/EECS498_L17_8.jpg)
 
 ## 深度图（Depth Map）
 
@@ -42,7 +42,7 @@
 
 深度图在概念上是一个非常简单的三维形状表示，深度图的作用是对于输入图像中的每个像素，分配从相机到该像素的距离，因为图像中的每个像素都对应于现实世界中的某个对象，现在深度图告诉我们，对于图像中的每个像素，相机与该像素试图表示的现实世界中的那个位置之间的距离是多少，单位是米。
 
-![9](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_10.jpg)
+![9](./assets/EECS498_L17_10.jpg)
 
 不过深度图比以往的RGB图要多一个网格，其中每个像素值给了我们一个深度信息，有些类似于RGB图像的二维网格，只不过像素的值不是颜色，而是“深度”，以米为单位的深度，然后将其与RGB图像结合，深度作为第四个信息通道，提供深度信息
 
@@ -54,19 +54,19 @@
 
 不过我们可以想尝试一个任务，就是输入一个普通RGB图像，然后尝试逐像素地预测相机到对应物体的距离（如下图所示），使用全卷积网络完成这个深度预测任务
 
-![10](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_11.jpg)
+![10](./assets/EECS498_L17_11.jpg)
 
 但是实际上这是不太可行的，因为在三维视觉中，会有**尺度/深度歧义（Scale / Depth Ambiguity）**的问题，比如说对于一张图片，无法区分出远处大物体和近处小物体，或者说仅通过单张二维图像，我们无法准确地确定物体的实际大小和距离
 
 如下图所示，大猫是小猫的两倍大小，但是与相机的距离也是小猫的两倍，那么看起来是完全一样的大小
 
-![11](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_12.jpg)
+![11](./assets/EECS498_L17_12.jpg)
 
 也就是说，绝对尺度和绝对深度在单个二维图像中并不明确，所以会产生这种问题，所以在处理任何类型的三维表示或者三维预测问题的时候，考虑这个潜在的问题是很有必要的
 
 但是我们可以通过改变神经网络的结构来处理尺度/深度歧义问题，或者说我们可以通过改进损失函数来完成深度预测问题
 
-![12](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_13.jpg)
+![12](./assets/EECS498_L17_13.jpg)
 
 因为尺度和深度实际上是不变的，假设我们的网络模型预测了一个深度，达到了Ground Truth Depth的某个恒定比例，那么上图中的尺度不变损失函数仍会将这个情况认定为零损失，或者说，这个尺度不变损失函数只会关心预测深度是不是匹配真实深度的某个固定倍数，这个属性细节叫做比例方差
 
@@ -78,13 +78,13 @@
 
 理解表面法线也对物体识别和场景理解有重要作用。例如，通过分析一幅图像中的表面法线，我们可以推断出物体的形状和结构。在一些深度学习应用中，表面法线也被用作一种重要的特征来帮助模型更好地理解场景。
 
-![13](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_14.jpg)
+![13](./assets/EECS498_L17_14.jpg)
 
 不过在这里，我们会使用RGB颜色来绘制法线的情况，比如说上图中，蓝紫色表示法向量是向上的，红色表示向前的
 
 当然我们也可以使用一个网络来预测表面法线，我们可以输入RGB图像，然后去预测每个位置的三维向量
 
-![14](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_15.jpg)
+![14](./assets/EECS498_L17_15.jpg)
 
 然后我们的损失函数是对比两个法向量之间角度的差异，这里我们使用点积除以范数的方式进行归一化，以此来训练网络
 
@@ -102,7 +102,7 @@
 
 体素网格就像是三维的像素网格，它将三维空间划分成了一系列的小立方体（也就是体素），可以使用某些方法看到每个体素是否被占用（比如一个bool值），这有点像我的世界一样。每个体素都可以存储一些信息，例如颜色、密度、表面法线等，有点像Mask R-CNN中物体背景和前景的表示。通过这种方式，我们可以在计算机中表示和处理三维对象。
 
-![16](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_17.jpg)
+![16](./assets/EECS498_L17_17.jpg)
 
 体素网格在许多领域都有应用，如计算机图形学、医学成像、地质科学和机器人导航等。例如，在计算机图形学中，体素网格可以用于渲染复杂的三维场景；在医学成像中，MRI和CT扫描的结果通常就是体素网格；在机器人导航中，体素网格可以用于表示环境并进行路径规划。
 
@@ -114,7 +114,7 @@
 
 输入数据是一个原始的体素网格，每个点都有占用或者未占用两种情况，如何我们使用三维卷积核（类似于一个立方体）去滑动来计算内积，有点类似于一个立方体滑动着遍历这个空间的每个地方，然后产生下一层的标量输出，若干次卷积处理之后进入分类层，这在架构上与之前的二维卷积完全一致
 
-![17](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_18.jpg)
+![17](./assets/EECS498_L17_18.jpg)
 
 当然，这里维度还是稍微有所不同的，每个阶段的张量都是一个四维张量，三个空间维度和一个特征维度（或者通道维度，表示体素是否被占用，这个是二进制的）
 
@@ -124,7 +124,7 @@
 
 左边输入的是一个RGB图像，两个空间维度和一个RGB通道维度，我们需要预测一个四维张量，带有三个通道维度和一个通道维度，可以通过网格中每个点的占用概率信息，这需要我们设置一些架构，来添加额外的空间维度，然后使用交叉熵损失来训练这个网络
 
-![18](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_19.jpg)
+![18](./assets/EECS498_L17_19.jpg)
 
 一种常见的完成这个任务的方式就是使用桥接的方式去连接不同维度的张量
 
@@ -164,7 +164,7 @@
 
 这种体素的想法是一个体素网格可以有多重分辨率，这样可以使用一些低分辨率体素去构建主要结构，然后使用高分辨率的体素去构建细节，高分辨率体素可能是低分辨率体素的稀疏子集
 
-![21](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_22.jpg)
+![21](./assets/EECS498_L17_22.jpg)
 
 ### 多分辨率体素：嵌套形状层
 
@@ -182,7 +182,7 @@
 
 与体素网格这种方法不同，体素网格这种方法就是在空间中一些有限点集上对这样的函数进行采样，然后将这些样本以某种显式网格表示形式存储到函数中，但是我们在这里使用隐式函数，使用这种数学函数本身来隐式地表示这些三维形状，然后我们可以在3D空间中的任意放置点从这个函数中采样，它应该告诉我们这个位置是在对象内部还是外部
 
-![25](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_26.jpg)
+![25](./assets/EECS498_L17_26.jpg)
 
 在实践中，通常把对象表示为层次分明的点集，比如说物体表面的占用概率就是0.5，我们可以直观的的显示，如上图所示，蓝色代表非常接近1的值，红色代表非常接近0的值，白色区域是0.5水平聚集的地方，代表三维形状的实际表面，或者可以成为带符合的距离函数
 
@@ -190,7 +190,7 @@
 
 当然这个函数可能会非常的复杂，所以我们会使用神经网络去学习这个函数表示
 
-![28](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_29.jpg)
+![28](./assets/EECS498_L17_29.jpg)
 
 ## 点云（Point Cloud）
 
@@ -202,13 +202,13 @@
 
 当然，点云也有缺点，如果你想实际提取一些三维形状来可视化，那么基需要某种后处理，因为在数学上，点云中的点是无限小的一个质点，但是在可视化的时候我们必须让每个点变成一个有限大小的球然后进行渲染，才可以在屏幕上可视化显示
 
-![31](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_32.jpg)
+![31](./assets/EECS498_L17_32.jpg)
 
 但是点云在神经网络中是一个非常有用的东西，同时也是非常常见的，比如说在自动驾驶中，激光雷达就是收集了周围环境的点云表示，所以在自动驾驶程序中，点云是经常使用的，我们可以根据这些原始点云输入去做出一些决策
 
 总的来说，点云是一种很好的表达形式，接近传感器原始数据，同时其表示起来很容易（一个多维向量就可以表示，坐标、颜色、强度等特征），同时可以更好的表示三维形状，在诸多领域都有很好的应用
 
-![3](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_LiuYongcheng_4.png)
+![3](./assets/PointCloudDL_ShenlanOpen_LiuYongcheng_4.png)
 
 但是注意一下，点云是一种无序的数据，不同的表示顺序对于点云并没有任何影响，并且点云还有平移/旋转不变性
 
@@ -220,7 +220,7 @@
 2. ShapeNet：每个物体点云由两千个点组成，常用来做分割任务
 3. PartNet：划分更精细，一个物体点云中包括了不同部件的划分，并且相对新，对机器人的抓取等任务更有用
 
-![5](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_LiuYongcheng_6.png)
+![5](./assets/PointCloudDL_ShenlanOpen_LiuYongcheng_6.png)
 
 上面的是一些相对独立的物体，下面是一些更偏实际大场景的数据集
 
@@ -239,7 +239,7 @@
 
 我们总是需要一种损失函数去训练网络，来比较生预测点云和实际标签之间的区别，或者说去比较二者之间的区别，同时需要这个函数是可微的，便于我们反向传播，这个函数就是钝化距离（Chamfer distance）
 
-![38](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_39.jpg)
+![38](./assets/EECS498_L17_39.jpg)
 
 我们想输入两组点，橙色和蓝色，然后钝角距离就会告诉我们，这两组点有何不同，实际上这个函数有两部分
 
@@ -261,19 +261,19 @@
 
 这是计算机图形学中非常常用的表示，有点类似于点云，因为它是将三维形状表示为三维空间中的一组顶点，在三角网格表示中，三维物体的表面被划分为许多小的三角形面片，这些三角形面片的集合就构成了三角网格。
 
-![41](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_42.jpg)
+![41](./assets/EECS498_L17_42.jpg)
 
 每个三角形面片由三个顶点（vertices）和三条边（edges）组成。顶点存储了空间中的坐标位置信息，可能还会包含其他属性信息，如颜色、法线、纹理坐标等。边连接了两个顶点，描述了三角形的形状。除此之外，三角网格还包括了面（faces），即由三条边围成的区域，它们描述了物体的表面。
 
 三角网格的优点在于它可以准确和高效地表示复杂的三维表面（在计算机图形学中常用）。由于三角形是平面的，任何复杂的三维表面都可以通过足够数量的三角形面片来逼近。此外，三角网格还支持多种几何运算，如交、并、差等。
 
-![44](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_45.jpg)
+![44](./assets/EECS498_L17_45.jpg)
 
 ### 预测三角网格：Pixel2Mesh
 
 当然这也需要一种新网络去处理这种数据，比如说ECCV2018年的一篇新论文，就是一种使用神经网络处理网格的算法，称为Pixel2Mesh，这种网络，输入一个RGB图像，然后输出一个三角网格，给出一个图像中物体的完整三维形状
 
-![46](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_47.jpg)
+![46](./assets/EECS498_L17_47.jpg)
 
 当然其中有几个关键的地方
 
@@ -281,7 +281,7 @@
 
 第一个地方就是，我们想构建一个神经网络来输出三角网格，但是实际上很难从头创建一个网格对象，所以我们需要将一些初始网格模板输入到网络中，然后随着网络的学习，这个网格开始变形，最终变为我们所需的输出，所以我们需要将初始的球状或者椭圆体网格作为模板在初始阶段输入网络
 
-![47](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_48.jpg)
+![47](./assets/EECS498_L17_48.jpg)
 
 我们会以某种方式去查看初始网格与图像的匹配度，然后不断的对网格进行更新（或者说迭代精细化），最后就可以输出与输入图像的几何形状非常匹配的三角网格
 
@@ -295,13 +295,13 @@
 
 我们想计算图卷积层的输出的时候，依然延续感受野的概念，每个顶点的新特征向量和输出特征取决于输入图中特征向量到图卷积层的局部感受野，所以我们需要依赖于一种特色的数学形式来计算，输出特征向量$f^\prime_i$取决于输入特征向量和所有相邻顶点的特征向量
 
-![48](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_49.jpg)
+![48](./assets/EECS498_L17_49.jpg)
 
 然后我们将这个卷积函数应用与图中的每个顶点，这类似于图像卷积，这样就可以应用与任意数量顶点的图
 
 我们认为这又是一种非常好的处理网格结构数据的方法，并提出了某种神经网络结构
 
-![50](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_51.jpg)
+![50](./assets/EECS498_L17_51.jpg)
 
 ### 对齐
 
@@ -309,11 +309,11 @@
 
 对于网格中每个顶点，我们想从图像中获得某种特征向量，代表图像在该顶点的空间位置上的视觉外观，我们可以完成的是，使用二维卷积网络处理图像来提取特征
 
-![51](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_52.jpg)
+![51](./assets/EECS498_L17_52.jpg)
 
 如果我们了解相机的内在特性，我们可以使用某种投影算子将我们的三维三角网格的顶点投影到图像平面上，对于每个顶点投影位置，我们使用双线性插值来从卷积网络输出的特征中进行采样，这样就可以使得每个顶点的特征向量完全对齐到图像平面中该特征的位置，这与我们之前在Mask R-CNN中的RoI对齐运算符的想法是一致的
 
-![52](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_53.jpg)
+![52](./assets/EECS498_L17_53.jpg)
 
 但是我们仍然想对特征向量和二维图像平面中的任意位置进行采样，而不是像RoI对齐哪有在规则网格中进行采样，我们现在要做的是在图像平面的每一点上对所有投影顶点位置的特征向量进行采样，这样才可以将图像信息混合到我们的图形卷积网络中
 
@@ -323,11 +323,11 @@
 
 我们实际上是有方法的，就是沿着网格内部取样，将其转化为点云（如下图所示），然后使用钝化距离来比较两个点云之间的区别
 
-![55](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_56.jpg)
+![55](./assets/EECS498_L17_56.jpg)
 
 当然这里区分一下在线采样和离线采样的区别，在线采样是对预测的网格采样，离线采样是对标签网格采样
 
-![59](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_60.jpg)
+![59](./assets/EECS498_L17_60.jpg)
 
 当然，我们需要通过左边的采样操作进行反向传播，这又是一个复杂问题
 
@@ -337,11 +337,11 @@
 
 我们也需要一些指标，来对比模型效果，便于查看模型是否训练良好，在二维目标检测中，我们会使用交并比来查看，在三维中，我们一样也可以使用类似的方法
 
-![66](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_67.jpg)
+![66](./assets/EECS498_L17_67.jpg)
 
 当然，在三维中，交并比可能并没有那么大的意义，所以我们可以使用钝化距离来比较我们的精度，这是因为钝化距离使用了L2距离，对异常值很敏感，很适合用来完成评价
 
-![69](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_70.jpg)
+![69](./assets/EECS498_L17_70.jpg)
 
 ## F1分数
 
@@ -351,7 +351,7 @@ F1分数在点云上进行评估，有点类似于钝化距离，我们有两组
 
 我们想象一下，每个预测点云周围扩展出一个球体，如果一些真实点云落在李沐，那么这个预测点云基被认为是真实的，在下图例子里面，四个橙色点云中三个是正确的，所以精度是3/4，三个真实点云只有两个被预测正确，那么召回率就是2/3，进行一个几何平均值处理就是F1分数
 
-![73](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_74.jpg)
+![73](./assets/EECS498_L17_74.jpg)
 
 - 精确率：在所有预测为正例的样本中，真正为正例的比例。
 - 召回率：在所有真正为正例的样本中，被正确预测为正例的比例。
@@ -380,7 +380,7 @@ F1分数的值范围在0到1之间。1表示模型的表现最佳，0表示模�
 
 我们想输入一张图片，然后输出一个三维形状来表示，那么我们必须使用一个坐标系，或者说我们必须使用一个**标准坐标（canonical coordinate）**，这意味着我们对每个对象类别的对象进行排序的时候，某种程度上就固定了标准方向，比如说下图中的椅子，可能Z轴正方向就是座椅前方
 
-![79](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_80.jpg)
+![79](./assets/EECS498_L17_80.jpg)
 
 另一种选择是在**视图坐标系（View Coordinates）**下进行预测，这会使得三维坐标系与输入图像对齐，是表示三维形状坐标系的另一个选择，很多人认为这是一种更容易的坐标系
 
@@ -394,7 +394,7 @@ ImageNet如此成功，以至于人们创建一个数据集就想为其起名字
 
 ShapeNet是一个三维模型数据集，提供了五十个类别的五万个模型
 
-![87](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_88.jpg)
+![87](./assets/EECS498_L17_88.jpg)
 
 但是，这个数据集是合成的，只有孤立的物体，没有上下文信息，所以需要其他的数据集，也就是Pix3D
 
@@ -404,45 +404,45 @@ ShapeNet是一个三维模型数据集，提供了五十个类别的五万个模
 
 这是R-CNN的三维版本，输入一个真实世界的RGB图像，然后为每个检测到的图像发出一个完整的三角网格，提供每个对象的三维形状
 
-![88](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_89.jpg)
+![88](./assets/EECS498_L17_89.jpg)
 
 Mesh R-CNN还是有很多优点的，比如说可以做出各种输出
 
-![89](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_90.jpg)
+![89](./assets/EECS498_L17_90.jpg)
 
 ## 方法改进：新的迭代精细化
 
 但是，网格变形的方法限制了可输出的三维形状的拓扑结构，这是因为输出必须有这与初始网格相同的拓扑结构，如果拓扑结构不同，比如说球体就无法变形为甜甜圈，这也是迭代精细化方法的一个局限性，这也是需要克服的
 
-![91](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_92.jpg)
+![91](./assets/EECS498_L17_92.jpg)
 
 克服的方法，就是首先进行粗糙的体素预测，然后将其转换为三角网格，得到这个网格之后继续迭代精细化操作，下图就展示了我们这个操作，对一个输入的RGB图像，首先进行二维目标检测，然后进行三维物体的体素重建，然后转化为三角网格进行迭代精细化，这样就可以输出有任意拓扑结构的网格了
 
-![95](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_96.jpg)
+![95](./assets/EECS498_L17_96.jpg)
 
 此外还有一些示例，都可以看到，效果还是十分精细的
 
-![96](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_97.jpg)
+![96](./assets/EECS498_L17_97.jpg)
 
 ## 正则化方式
 
 当然，这里还有一个小问题，然后我们只使用钝化距离作为损失函数进行训练，可能得到非常难以理解的结构，所以我们需要使用一些正则化方法来实现视觉上更符合人类审美的输出
 
-![97](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_98.jpg)
+![97](./assets/EECS498_L17_98.jpg)
 
 除了钝化距离以为，我们还最小化了网格中每条边的L2范数
 
-![98](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_99.jpg)
+![98](./assets/EECS498_L17_99.jpg)
 
 可以看到，模型可以输出细粒度更好的形状
 
 当然，我们知道这个模型是建立在一个目标检测框架上的，所以可以检测非常多的对象，甚至可以预测对象的不可见部分，比如说下图中被狗头遮挡的沙发
 
-![100](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_101.jpg)
+![100](./assets/EECS498_L17_101.jpg)
 
 当然这个也有不足，就是如果二维视觉中失败的地方，往往也会成为三维视觉中失败的地方，比如说那些被遮挡的物体
 
-![101](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_102.jpg)
+![101](./assets/EECS498_L17_102.jpg)
 
 # 三维场景理解
 
@@ -450,7 +450,7 @@ Mesh R-CNN还是有很多优点的，比如说可以做出各种输出
 
 这里主要有两个主题，三维目标检测（物体识别）和三维场估计
 
-![72](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_88.png)
+![72](./assets/PointCloudDL_TechBeatTalk_CharlesQi_88.png)
 
 与二维的视觉理解（包括分类、检测、分割等）一致，想对三维场景进行理解，也要先进行分类，然后再进行分割和检测，同时，因为实际上三维场景理解通常会使用多种传感器一起进行感知，所以任务会负责许多
 
@@ -477,7 +477,7 @@ PointNet的网络结构主要由两部分组成：
 1. 输入转换网络：这部分的作用是学习一个对齐网络，用于将输入的点云对齐到一个规范化的坐标系统。它包括几个MLP（多层感知机）层和一个max pooling层，最后输出一个转换矩阵，这个矩阵会被应用到输入的点云上，以此解决点云的平移旋转不变性。
 2. 特征提取网络：这部分的作用是从对齐后的点云中提取全局特征。它也包括几个MLP层（每一层MLP都是权重共享的）和一个max pooling层。max pooling层在所有的点上取最大值，从而实现了对点的置换不变性。
 
-![9](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_LiuYongcheng_10.png)
+![9](./assets/PointCloudDL_ShenlanOpen_LiuYongcheng_10.png)
 
 这里的公式里面有两个函数，对称函数$g$和权重共享的变换函数$h$，其中前者是最大池化实现，后者是MLP实现
 
@@ -487,7 +487,7 @@ PointNet可以进行点分类，也可以进行点分割。对于点分类，网
 
 PointNet具体是怎么工作的呢？我们想输入一组点云，假设有P个点，每个点都有一个三维空间的XYZ位置信息
 
-![32](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/EECS498_L17_33.jpg)
+![32](./assets/EECS498_L17_33.jpg)
 
 我们想做的第一件事就是对形状进行分类，当然我们不希望点在点云中的顺序很重要，或者说我们不希望点在点云中的存储顺序会影响分类结果，实际上存储结构的确也不会有所影响，就有点类似于之前的Transformer结构
 
@@ -507,7 +507,7 @@ PointNet虽然简单，但却非常强大，它已经在很多3D视觉任务上�
 
 首先我们看一下点云的输入，一组点云有N个点，每个点有D个特征（最基本的有左边，还有法向量等），这样就使用一个NxD矩阵表示，因为点云的无序性，那么任意置换行，不会影响其中信息，或者说矩阵虽然不同，但是代表的点集一样
 
-![16](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_27.png)
+![16](./assets/PointCloudDL_TechBeatTalk_CharlesQi_27.png)
 
 我们知道，神经网络本质上就是一个函数，所以需要设计一个具有置换不变性的网络，这样就可以处理点云了，我们就需要一个**对称函数（Symmetric Function）**，也就是具备以下性质的函数
 $$
@@ -517,27 +517,27 @@ $$
 
 当然，这些方法也有问题，比如说我们直接对每个维度依次取最大值，比如说输入一组点云（下图所示），第一个维度最大是2，第二个维度是2，第三个维度是4，或者平均值来求重心，但是这种方法会丢失很多几何信息，所以我们不能直接在数据集上应用对称函数
 
-![18](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_31.png)
+![18](./assets/PointCloudDL_TechBeatTalk_CharlesQi_31.png)
 
 我们可以使用一个高维空间映射，比如说使用一个一千维的向量来表示一个点，这样信息肯定是冗余的，然后我们就可以使用另一个网络$y$来消化这些信息，这样，只要函数$g$是对称的，那么这个结构就是对称的，试验证明，最大池化是一个比较好的方式
 
-![21](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_34.png)
+![21](./assets/PointCloudDL_TechBeatTalk_CharlesQi_34.png)
 
 #### 理论分析
 
 我们前面知道了，我们可以使用神经网络构建的对称函数去保证对称，那么这种结构在所有的对称函数中是什么样的一个情况呢？或者说能不能表达任意对称函数呢？
 
-![22](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_35.png)
+![22](./assets/PointCloudDL_TechBeatTalk_CharlesQi_35.png)
 
 实际上，PointNet是一种**通用逼近器（Universal Approximation）**，可以任意逼近任意一个集合上的对称函数，只要函数在Hausdorff空间中是连续的，我们可以通过增加网络宽度和深度去任意逼近
 
-![23](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_36.png)
+![23](./assets/PointCloudDL_TechBeatTalk_CharlesQi_36.png)
 
 #### 输入对齐
 
 实际上，同一个物体可能因为视角不同所以看起来不一样（或者说点云存在几何变换问题），比如说一辆车在不同角度看，那么空间位置就会不同，所以我们需要解决这种变换，方法就是增加一个基于数据的变换函数（或者叫T-Net），下图中的Transform就是一个矩阵乘法，不过点云是一种很容易做几何变换的数据，不想图片变换那样复杂，所以只需要进行一次乘法就可以（或者对齐就是**归一化处理**）
 
-![25](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_38.png)
+![25](./assets/PointCloudDL_TechBeatTalk_CharlesQi_38.png)
 
 当然，我们不只是在输入的时候进行变换，还可以在中间的时候进行变换
 
@@ -555,7 +555,7 @@ $$
 
 网络结构如下
 
-![35](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_50.png)
+![35](./assets/PointCloudDL_TechBeatTalk_CharlesQi_50.png)
 
 - 网络的输入是一个nx3的矩阵（包括n个点），
 
@@ -567,7 +567,7 @@ $$
 
 如果我们想完成点云分割任务
 
-![38](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_53.png)
+![38](./assets/PointCloudDL_TechBeatTalk_CharlesQi_53.png)
 
 基于全局坐标是没办法对每个点进行分割的，所以一个简单有效方法就是将局部特征和全局坐标结合起来，相当于单个点在全局特征中进行了一次检索，查看自己在全局特征中的位置
 
@@ -575,19 +575,19 @@ $$
 
 这是点云深度学习中最经典最早的工作，跟传统的3D CNN相比性能更好
 
-![40](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_55.png)
+![40](./assets/PointCloudDL_TechBeatTalk_CharlesQi_55.png)
 
 同时，相比于传统的一些网络，更加轻量化也更加高效，可以用在移动设备上
 
-![44](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_59.png)
+![44](./assets/PointCloudDL_TechBeatTalk_CharlesQi_59.png)
 
-![45](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_60.png)
+![45](./assets/PointCloudDL_TechBeatTalk_CharlesQi_60.png)
 
 #### 效果展示
 
-![41](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_56.png)
+![41](./assets/PointCloudDL_TechBeatTalk_CharlesQi_56.png)
 
-![43](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_58.png)
+![43](./assets/PointCloudDL_TechBeatTalk_CharlesQi_58.png)
 
 #### 鲁棒性
 
@@ -597,7 +597,7 @@ $$
 
 那么为什么PointNet对数据丢失这么鲁棒呢？我们先看原始的点云输入
 
-![47](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_TechBeatTalk_CharlesQi_63.png)
+![47](./assets/PointCloudDL_TechBeatTalk_CharlesQi_63.png)
 
 我们想知道哪些点对于全局特征做出来重要贡献，这些称为**关键点（Critical Point）**，我们可以看到，这些关键点表示了物体的几何形状轮廓或者骨骼形状，只要保存了这些关键点，那么就可以分类正确，这就解释了PointNet的鲁棒性
 
@@ -605,23 +605,23 @@ $$
 
 当然，PointNet也有不足，就是占用的空间太多，当有K个点云输入的时候，就会有$K\times C_{in}\times C_{out}$大小的中间权重张量存在，当进行反向传播的时候，会产生巨大的空间占用，所以在2017年PointNet的工作中，只能构建一些小的网络，这也是其问题所在
 
-![20](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_20.png)
+![20](./assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_20.png)
 
 李伏欣在2019年论文中的工作是，发现PointNet中的操作主要是乘积和加法，可以交换次序，比如说图中M处就可以移动到最后进行，然后中间就不需要复制$C_{out}$次了，就可以节省大量计算量，并且还有理论分析
 
-![21](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_21.png)
+![21](./assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_21.png)
 
 改进后的网络架构，极大地节省了参数量（可节省约六十倍），大大加快了计算的速度，并且可以构建更大的网络（可达三十层），下图中就相当于一个卷积层，可以进行叠加组合构成一个网络
 
-![22](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_22.png)
+![22](./assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_22.png)
 
 ### PointNet++：更强大的PointNet
 
 #### 动机
 
-在解决置换性方面，PointNet使用两个操作，首先，针对一个点的特征向量，进行一个一维卷积，这相当于乘以一个同样维度的矩阵（下图第一栏所示），得到一个新的特征向量，这是针对单个点的操作，如果想针对多个点，就使用最大池化操作（下图第二栏所示），当然，只使用这两个操作是不够的，或者说PointNet太简单了，没有使用卷积的思想
+在解决置换性方面，PointNet使用两个操作，首先，针对一个点的特征向量，进行一个一维卷积，这相当于乘以一个同样维度的矩阵（下图第一栏所示），得到一个新的特征向量，这是针对单个点的操作，如果想针对多个点，就使用最大池化操作（下图第二栏所示），当然，只使用这两个操作是不够的，或者说PointNet太简单了，没有使用卷积的思想，缺少对局部特征的处理手段
 
-![8](/home/gpf/Project/ML_DL_CV_with_pytorch/EECS498/assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_6.png)
+![8](./assets/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_6.png)
 
 虽然PointNet很强大，但是还是有缺点的，我们先从三维卷积开始了解，进行对比
 
@@ -813,6 +813,81 @@ AI辅助外形设计（工业4.0）
 ### 点云目标检测框架
 
 目前的点云目标检测框架大概有这些
+
+## PointRCNN：点云目标检测算法
+
+### 介绍
+
+PointRCNN是CVPR2019录用的一篇三维目标检测论文，曾在KITTI的3D检测测试中排名第一，文章为[PointRCNN：3D Object Proposal Generation and Detection from Point Cloud][https://openaccess.thecvf.com/content_CVPR_2019/html/Shi_PointRCNN_3D_Object_Proposal_Generation_and_Detection_From_Point_Cloud_CVPR_2019_paper.html]，这是一个两阶段的框架，先定位后精细化，与图像的两阶段目标检测算法思想类似
+
+- **第一阶段**：
+
+  目的：生成3D bounding box proposals
+
+  方法： 通过利用3D bounding box来生成ground-truth分割掩码，第一阶段分割前景点，同时在这些被分割出来的点中生成少些bounding box proposals。
+
+  优势：避免了 在整个3D空间使用大量的anchor box和保存大量的计算。
+
+- **第二阶段**：
+
+  目的：进行标准的3D box微调
+
+  方法：在3D proposals生成之后，用一个点云ROI pooling操作来处理第一阶段学习到的点。现存的3D方法都是直接估计全局box坐标，而作者的方法是将被池化的3D点转换到正则坐标，并且和来自阶段1的被池化的点的特征还有分割掩码结合，从而学习相对坐标微调。
+
+  优势：充分利用了第一阶段分割和子网络提供的结果信息。
+
+### 动机
+
+基于点云的3D检测的困难主要在于点云的不规则性，常见3D检测的SOTA的方法：
+
+1. 将点云投射到俯视图(AVOD)或者投射到前视图(MV3D)，利用2D检测的框架进行目标检测
+2. 变成规则的3D voxels (VoxelNet)。
+
+但这些都不是最佳的，而且投射的方法会遇到在量化过程中信息缺失的问题，并且三维卷积的计算量大。
+
+后来有人提出PointNet，不将点云转换成voxels或其他的规则的数据结构来进行特征学习，而是直接从点云数据来学习3D表示，他们还在3D目标检测中应用了PointNet，从2D RGB检测的结果获得被截取点云，基于这个来估计3D bounding box（F-PointNet，视锥网络），但是这种方法过于依赖2D检测的表现，如果图像漏检或者重叠，都会带来较坏的结果。
+
+### 工作原理
+
+整体的网络架构如下
+
+![PointRCNN_1](.\assets\PointRCNN_1.png)
+
+- stage-1：基于点云分割的3D RPN
+
+  ![3DCVer_AutoDrivePointCloudDetection_L3_11](.\assets\3DCVer_AutoDrivePointCloudDetection_L3_11.png)
+
+  **核心思想**：学习point-wise 的特征来分割原始点云，在分割好的前景上生成3D 候选框。这样避免了在3D空间中使用大量预定义的3D框，极大地限制了3D建议框的搜索空间，从而减少计算
+
+  **具体过程**：
+
+  （1）提取点云特征：PointNet++ 作为骨干网络提取特征point-wise feature vector
+
+  （2）前景点分割：每个点的分类问题，由两个卷积层组成。输入是(bs,n,128)的特征（每个batch中，有n个点，每个点有128维特征），输出是(bs, n, 1)的mask（只是区分这个点是不是前景点）。由于背景点的数量远大于前景点数量，正负样本不均衡，所以分类误差损失函数选择使用focal loss
+
+  （3）基于bin区间的3D框生成：也是由两个卷积层组成。输入是(bs, n, 128)的特征，输出是(bs, n, 76)。3d目标检测里的bounding box，需要7个量来表示：[x,y,z,l,w,h,yaw]。这里用基于bin的预测方法使76个维度特征来代表这7个量，然后进行非极大值抑制（NMS），得到一批预选3d区域
+
+- stage-2：基于bin区间的3d框回归
+
+  ![PointRCNN_2](.\assets\PointRCNN_2.png)
+
+  3D box： ( x , y , z , h , w , l , θ ) 
+
+  bin就相当于直尺上的刻度，用绿色大括号表示。这里设物理空间中0.5m是一个bin。通过分类的方式去预测每个点对于bounding box中心点偏移了几个bin（或者说预测中心点落在哪一个bin里面），而不是直接回归具体的位置，其中蓝色的是分割出来的前景点，紫色的是兴趣前景点，以兴趣前景点为例去进行预测
+
+  旋转角也用这种基于bin的方法预测，是把π话分成若干个bin。由于bin是一个整数，还是无法精确定位，所以还需要预测中心点坐标在一个bin中的偏移量。
+
+  此外，76维输出向量是如何对应7个参数的呢
+
+  ![3DCVer_AutoDrivePointCloudDetection_L3_16](.\assets\3DCVer_AutoDrivePointCloudDetection_L3_16.png)
+
+  76维的前12维，x\_bin，是判断X轴的bin区间，判断中心点落在哪一个bin上，12维表示坐标轴正负各有六个bin，然后还有在每个bin上的回归，x\_res，也占了十二个维度，然后在XZ方向上都是如此操作，就占了48个维度
+
+  但是在Y方向（或者说垂直方向）上没有这种划分，因为自动驾驶的目标物体都是在地面上的，所以不会出现太大的出入，只有一个一维回归
+
+  然后YAW角也是基于bin的划分，12个bin区间和12个偏移量
+
+  最后对长宽高也是有回归，占3维
 
 ## CenterPoint：点云目标检测
 
