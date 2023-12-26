@@ -42,12 +42,25 @@
 - 视觉slam（VIO）：orbslam、vins、svo、dso
 - 激光slam（2d）：gmapping、hector、Karto、cartographer2d
 - 激光slam（3d）：loam系、cartographer3d、Ndt
-  本课程中我们仅仅关注建立3d点云地图的激光slam算法，尤其是Ndt算法
+
+本课程中我们仅仅关注建立3d点云地图的激光slam算法，尤其是Ndt算法
 
 在前面我们有讲到，建图的关键在于位姿变化的准确估计，对于slam算法而言，位姿变化的计算是通过
 点云特征匹配优化后得出的。
 根据特征匹配形式的分类
-Scan to Scan：loam系
-Loam会将输入scan中的点云根据曲率大小分为平面点和边缘点，之后的匹配优化过程也是针对当前输入
-scan和上一scan的平面点和边缘点来研究进行的。根据边缘点的距离优化公式和平面点的距离优化公式
-来构造优化方程求解位姿变化量
+
+- Scan to Scan：loam系
+  Loam会将输入scan中的点云根据曲率大小分为平面点和边缘点，之后的匹配优化过程也是针对当前输入scan和上一scan的平面点和边缘点来研究进行的。根据边缘点的距离优化公式和平面点的距离优化公式来构造优化方程求解位姿变化量。Lego-loam、lio-sam等都是基于这一原理来进行位姿优化求解的、只不过他们引入了更多传感器并加入了回环检测。
+
+- Scan to Map ：Cartographer、Ndt
+  二者都是通过当前scan同已经建好的map（或者submap）来进行特征匹配的，和loam提取有曲率特征的点云不同，Cartographer将当前scan通过hit的方式来和上一次建好的submap来进匹配优化；而Ndt则是将map网格化后计算每个网格的均值方差，并通过当前scan中的每个点落在map网格中的正太分布概率来进行匹配优化的。
+
+# map_file模块解析
+
+解析流程如下
+
+![Autoware.ai_L2_10](/home/pengfei/文档/ML_DL_CV_with_pytorch/AutoDriving/assets/Autoware.ai_L2_10.png)
+
+map_file是一个ros package，有两个节点，分别负责读取pcd点云文件和csv语义地图文件，两个节点有三个输出的话题，如下图所示
+
+![Autoware.ai_L2_11](/home/pengfei/文档/ML_DL_CV_with_pytorch/AutoDriving/assets/Autoware.ai_L2_11.png)
