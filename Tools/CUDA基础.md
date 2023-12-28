@@ -23,7 +23,7 @@ nvcc hello.cu -o hello
 
 这里的nvcc就是专属cuda程序的编译器，如果使用gcc等编译器直接编译cuda文件的话会报错，实际上nvcc与g++的内容大多数是共用的，只不过nvcc有一些专门编译cuda函数的内容
 
-当然我们可以使用CMake构建项目，而不是使用makefile
+当然我们可以使用CMake构建项目，而不是使用makefile，我们配置的CMakeLists.txt是这样的
 
 ```cmake
 cmake_minimum_required(VERSION 3.8)
@@ -38,7 +38,16 @@ cuda_add_executable(cuda_test src/introduction.cu)
 target_link_libraries(cuda_test ${CUDA_LIBRARIES})
 ```
 
-使用包CUDA，包括CUDA的路径，然后使用cuda_add_executable编译cu文件
+使用CUDA package，include CUDA的路径，然后使用cuda_add_executable编译cu文件
+
+当然，我们可以直接在LANGUAGES后面加CUDA，即可使用add_executable，否则无法cmake
+
+```cmake
+project(CUDA_TEST LANGUAGES CXX CUDA)
+add_executable(cuda_test src/introduction.cu)
+```
+
+
 
 # CUDA中的线程与线程束
 
@@ -112,7 +121,7 @@ cudaDeviceSynchronize();这条语句调用了CUDA运行时的API函数，去掉�
 
 ## 计算过程
 
-计算过程示意图如下
+计算过程示意图如下，blockSize为1
 
 ![AutoDriverHeart_TensorRT_L2_29](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_29.png)
 
@@ -122,10 +131,18 @@ cudaDeviceSynchronize();这条语句调用了CUDA运行时的API函数，去掉�
 
 ![AutoDriverHeart_TensorRT_L2_32](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_32.png)
 
-我们可以基于Grid和Block的逻辑进行切分计算
+我们可以基于Grid和Block的逻辑进行切分计算，这样可以大大加快计算的效率
 
 ![AutoDriverHeart_TensorRT_L2_34](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_34.png)
 
-CUDA中有个规定，就是一个block中可以分配的
-thread的数量最大是1,024个线程。如果大于
-1,024会显示配置错误
+CUDA中有个规定，就是一个block中可以分配的thread的数量最大是1,024个线程。如果大于1,024会显示配置错误
+
+GPU的warmup：GPU在启动的时候是有一个延时的，会干扰对算法执行时间的测量，所以可以先启动GPU让其完成一点任务，然后再测量
+
+## 程序
+
+定义在GPU上的函数有几种
+
+- `__global__`：定义核函数，在GPU上执行，从CPU端通过三重括号的语法调用，可以有参数，不可以有返回值
+- `__device__`：定义设备函数，在GPU上调用也在GPU上执行，不需要三重括号，与普通函数一样，可以有参数，有返回值
+- 总的来说，host可以调用global，global可以调用device，device也可以调用device
