@@ -1,3 +1,12 @@
+# CUDA概念
+
+CUDA建立在NVIDIA的GPU上的一个通用并行计算平台和编程模型，CUDA旨在支持各种语言和应用程序编程接口，最初基于C开发，现在已经支持了多种语言，如C++、Python等
+基于GPU的并行训练已经是目前大火的深度学习的标配，我们可以使用CUDA编程在GPU上加速部署深度学习模型
+
+## API
+
+在使用GPU时，我们需要使用CUDA调用API，CUDA 提 供 两 层 API 接 口 ， CUDA 驱 动(driver)API和CUDA运行时(runtime)API两种API调用性能几乎无差异，课程使用操作对用户更加友好Runtime API
+
 # 第一个CUDA程序
 
 我们在目录下新建一个文件，命名为hello.cu，cu表示这是一个CUDA程序
@@ -19,9 +28,9 @@ nvcc hello.cu -o hello
 ./hello
 ```
 
-然后就可以输出helloword了
+然后就可以输出helloword了，nvcc是编译命令，hello.cu是待编译的文件，-o表示输出的可执行文件的名字，后面跟的hello就是这个名字的具体内容
 
-这里的nvcc就是专属cuda程序的编译器，如果使用gcc等编译器直接编译cuda文件的话会报错，实际上nvcc与g++的内容大多数是共用的，只不过nvcc有一些专门编译cuda函数的内容
+这里的nvcc就是专属cuda程序的编译器，安装CUDA之后即可使用，如果使用gcc等编译器直接编译cuda文件的话会报错，实际上nvcc与g++的内容大多数是共用的，nvcc可以编译纯C++的代码，只不过nvcc有一些专门编译cuda函数的内容
 
 当然我们可以使用CMake构建项目，而不是使用makefile，我们配置的CMakeLists.txt是这样的
 
@@ -47,7 +56,64 @@ project(CUDA_TEST LANGUAGES CXX CUDA)
 add_executable(cuda_test src/introduction.cu)
 ```
 
+## 核函数（kernel function）
 
+我们在之前做的helloworld程序，实际上就是一个C++程序，没有CUDA的内容，只不过使用了CUDA编译器编译而已，在这里我们将真正使用CUDA编程
+
+我们知道，CPU才是决策者，是主处理器，GPU是协处理器，可以当做CPU的外设，所以GPU的执行过程需要经过CPU的控制，因此我们需要同时编写在CPU上执行的代码和在GPU上的代码，这里就需要核函数这个概念
+
+核函数是在GPU上进行并行处理的函数，不过不需要开发人员手动进行并行执行，这个并行是由硬件完成的
+
+核函数前面使用`__global__`修饰，返回值类型必须是`void`，并且两种修饰可以位置互换
+
+```c++
+__global__ void kerner_function(arguments arg)
+void __global__ kernel_function(argument arg)
+```
+
+
+
+- 核函数只能访问GPU内存（或者说显存），目前CPU和GPU都有自己独立的内存，相互内存的访问是通过PCIE总线完成的，无法直接访问，需要使用运行时API进行内存访问
+- 核函数不能使用变长参数，只能使用定长参数
+- 核函数不能使用静态变量，不能使用函数指针，具有异步性
+
+## 编写流程
+
+对于CUDA程序的编写，大概流程是先写主机代码（主要是配置和数据处理方面的内容），然后调用核函数（并行加速数据处理），然后再主机代码（数据传输和内存释放），最后返回0，同时，**注意核函数不支持C++的iostream**
+
+总的来说，运行在GPU中的核函数也是要在主机代码中调用的，调用完成后，数据传回CPU进行进一步处理并且释放空间
+
+这里有一个很重要的函数需要注意，就是同步函数
+
+```c++
+#include<stdio.h>
+__global__ void hello()
+{
+    printf("hello world from GPU!\n");
+}
+int main(void)
+{
+    hello<<<1,1>>>();
+    cudaDeviceSynchronize();
+    return 0;
+}
+```
+
+`cudaDeviceSynchronize()`这个函数调用了CUDA运行时的API函数，作用是同步主机与设备，促使缓冲区刷新，去掉这个函数就打印不出字符了。我们要知道，在主机函数中调用核函数，只是启动了这个核函数，CPU还是要顺序执行，这样就会碰到GPU计算还没有结束但是CPU已经执行完的情况，这时候就需要主机和设备进行同步，然后统一进行顺序处理
+
+cuda调用输出函数时，输出流是先放在缓存区的，而这个缓存区不会核会自动刷新，只有程序遇到某种同步操作时缓存区才会刷新。这个函数的作用就是同步主机与设备，所以能够促进缓存区刷新。
+
+至此，我们就完成了一个基本的CUDA编程了，然后使用CMake编译，就可以运行了
+
+## nvcc编译流程
+
+nvcc进行编译的时候，会将源代码分离为主机代码和设备代码，前者是C/C++语言，后者是C/C++的扩展语言
+
+nvcc先将设备代码编译为PTX（Parallel Thread Execution）伪汇编代码，再将PTX代码编译为二进制的cubin目标代码，在将源代码编译为 PTX 代码时，需要用选项-arch=compute_XY指定一个虚拟架构的计算能力，用以确定代码中能够使用的CUDA功能。
+
+在将PTX代码编译为cubin代码时，需要用选项-code=sm_ZW指定一个真实架构的计算能力，用以确定可执行文件能够使用的GPU。
+
+当然实际上会复杂很多，这只是流程的概述
 
 # CUDA中的线程与线程束
 
@@ -55,16 +121,100 @@ add_executable(cuda_test src/introduction.cu)
 
 gpu不是单独的在计算机中完成任务，而是通过协助cpu和整个系统完成计算机任务，把一部分代码和更多的计算任务放到gpu上处理，逻辑控制、变量处理以及数据预处理等等放在cpu上处理，所以在这里会使用host代表CPU和内存，使用device来代表GPU和显存 。一个程序很可能是CPU开始执行，然后在某些时刻将某些计算放在GPU上计算，这个时候就需要用到kernel（核函数），这个kernel是一个以线程为单位来计算的函数，在这里的作用相当于一个入口
 
-如下图所示，一个kernel会分配一个grid，一个grid是层级架构，一个grid里面就有多个block，一个block里面有多个thread，这里注意一下，grid和block是逻辑概念，实际上GPU中不存在物理意义上的grid和block，在编程中使用是为了方便
-
-总的来说，grid是一组被一起启动的CUDA核心的集合，用于定义整个GPU上的 并行作业，grid中的block是一个小工作单元，包括了一组可写作的thread，提供了一种小范围内的数据共享和协作模式，每个block可以在GPU的一个多处理器上执行，grid和block都可以是一维、二维或者三维的，便于灵活组织数据
+如下图所示，一个kernel会分配一个grid（或者说网格），一个grid是层级架构，一个grid里面就有多个block（线程块），一个block里面有多个thread（CUDA中编程的最小单位），**这里注意一下，grid和block是逻辑概念，实际上GPU中不存在物理意义上的grid和block，在编程中使用是为了方便**
 
 thread是基本执行单元，在同一个block和grid中的thread会执行相同的核函数
 
 ![AutoDriverHeart_TensorRT_L2_7](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_7.png)
 
+总的来说，grid是一组被一起启动的CUDA核心的集合，用于定义整个GPU上的 并行作业，grid中的block是一个小工作单元，包括了一组可写作的thread，提供了一种小范围内的数据共享和协作模式，每个block可以在GPU的一个多处理器上执行，grid和block都可以是一维、二维或者三维的，便于灵活组织数据
+
+配置线程：kernel<<<grid_size, block_size>>>，表示一个核函数中有几个block和block结构，一个block中有几个thread和thread结构，在实际工程中，线程数可以远高于GPU的计算核心数，这样才能更充分的利用计算资源
+
 在grid中，每个block都有一个shared memory（block级别的共享内存），并且还有多级的memory，同时每个thread都直接连接一个register（寄存器）和一个local memory
-## block和thread的遍历
+
+## 一维线程模型
+
+每个线程在核函数中都有一个唯一的身份标识，唯一标识由这两个<<<grid_size, block_size>>>确定；grid_size, block_size保存在内建变量（build-in variable，使用的时候不需要去定义变量，这个变量是固定下来的 ，在核函数中可以直接使用），目前考虑的是一维的情况，内建变量有：
+
+- gridDim.x：该变量的数值等于执行配置中变量grid_size的值；
+
+- blockDim.x：该变量的数值等于执行配置中变量block_size的值。
+
+- 线程索引保存成内建变量（ build-in variable）：
+  - blockIdx.x：该变量指定一个线程在一个网格中的线程块索引值，范围为0~ gridDim.x-1；
+  - threadIdx.x：该变量指定一个线程在一个线程块中的线程索引值，范围为0~ blockDim.x-1。
+
+比如说`kernel_fun<<<2,4>>>()`，在内存中就会下图这个情况
+
+![CUDA_1](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_1.png)
+
+然后我们就可以在特定的线程中输出特定的信息，比如说输出线程本身的标识
+
+```c++
+#include <stdio.h>
+
+__global__ void hello_from_gpu()
+{
+    const int bid = blockIdx.x;
+    const int tid = threadIdx.x;
+
+    const int id = threadIdx.x + blockIdx.x * blockDim.x; 
+    printf("Hello World from block %d and thread %d, global id %d\n", bid, tid, id);
+}
+
+
+int main(void)
+{
+    hello_from_gpu<<<2, 4>>>();
+    cudaDeviceSynchronize();
+
+    return 0;
+}
+```
+
+## 多维线程模型
+
+CUDA最多可以组织三维的网格和线程块，blockIdx和threadIdx是类型为uint3的变量，该类型是一个结构体，具有x,y,z三个成员（3个成员都为无符号类型的成员构成）
+
+![CUDA_2](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_2.png)
+
+并且gridDim和blockDim未指定的维度默认为1
+
+我们在程序中定义多维网格和线程块的时候使用C++构造函数的语法
+
+```c++
+dim3 grid_size(Gx, Gy, Gz);
+dim3 block_size(Bx, By, Bz);
+```
+
+举个例子,定义一个 2×2×1 的网格， 5×3×1的线程块，代码中定义如下:
+
+```c++
+dim3 block_size(5, 3); // 等价于dim3 block_size(5, 3, 1);
+dim3 grid_size(2, 2); // 等价于dim3 grid_size(2, 2, 1);
+```
+
+**多维网格和多维线程块本质是一维的，GPU物理上不分块。**
+
+每个线程都有唯一标识：
+
+```
+int tid = threadIdx.y * blockDim.x + threadIdx.x;
+int bid = blockIdx.y * gridDim.x + blockIdx.x;
+```
+
+tid就是每个线程块中线程的索引，bid是一个网格中线程块的索引
+
+对三维的情况有
+
+![CUDA_3](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_3.png)
+
+并且注意一下数量有限制
+
+![CUDA_4](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_4.png)
+
+## block和thread的索引与遍历
 
 一个kernel中有这么多的子单元，我们自然想的是如何进行遍历
 
@@ -98,14 +248,129 @@ __global__ void print_idx_kernel(){
 } 
 ```
 
-不过需要注意一下遍历顺序，是先遍历z，后y，最后x
+不过需要注意一下遍历顺序，是先遍历z，后y，最后x，或者说，z是最高的最外层的维度，x是最低的最内层的维度，就好比说你是某市z学校的y班的x学生
 
 ![AutoDriverHeart_TensorRT_L2_11](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_11.png)
 
-在核函数的调用格式上与普通C++的调用不同，调用核函数的函数名和（）之间有一对三括号，里面有逗号隔开的两个数字。因为一个GPU中有很多计算核心，可以支持很多个线程。主机在调用一个核函数时，必须指明需要在设备中指派多少个线程，否则设备不知道怎么工作。三括号里面的数就是用来指明核函数中的线程数以及排列情况的。核函数中的线程常组织为若干线程块（thread block）。
-三括号中的第一个数时线程块的个数，第二个数可以看作每个线程中的线程数。一个核函数的全部线程块构成一个网格，而线程块的个数记为网格大小，每个线程块中含有同样数目的线程，该数目称为线程块大小。所以核函数中的总的线程就等与网格大小乘以线程块大小，即<<<网格大小，线程块大小 >>>
-核函数中的printf函数的使用方法和C++库中的printf函数的使用方法基本上是一样的，而在核函数中使用printf函数时也需要包含头文件<stdio.h>,核函数中不支持C++的iostream。
-cudaDeviceSynchronize();这条语句调用了CUDA运行时的API函数，去掉这个函数就打印不出字符了。因为cuda调用输出函数时，输出流是先放在缓存区的，而这个缓存区不会核会自动刷新，只有程序遇到某种同步操作时缓存区才会刷新。这个函数的作用就是同步主机与设备，所以能够促进缓存区刷新。
+然后索引的求法如下
+
+求block在网格中的索引blockId，求thread在线程块中的索引threadId，还有线程在所有线程中的索引id
+
+![CUDA_5](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_5.png)
+
+# 程序兼容性问题
+
+## 概念
+
+不同的GPU有不同的计算能力，可以使用版本号表示其计算能力（如下图所示），以`X.Y`的形式表示，不同的版本号在计算资源和架构上有所区别，文件在不同的架构上不一定通用，也就是说在一种版本的GPU上编译的文件，放到另一个主版本号不同的GPU设备上很可能无法执行
+
+主版本号相同，次版本号不同的GPU，配置差异不大，仅仅在性能和功能上略有差异
+
+![CUDA_6](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_6.png)
+
+## 指定虚拟架构计算能力
+
+为了解决兼容性问题，C/C++源码编译为PTX时，可以指定虚拟架构的计算能力，用来确定代码中能够使用的CUDA功能，可以看出来，C/C++源码编译PTX这一步是与GPU无关的，虚拟架构更像是对所需GPU功能的一个声明，实际上，虚拟架构计算能力是一个衡量 GPU 功能特性的版本号，定义了 GPU 支持的特定功能，如双精度浮点运算、原子操作、并行线程执行模型等，计算能力是非常重要的，因为某些 CUDA 特性只在特定的计算能力版本或更高版本上可用
+
+**虚拟架构**（Compute Capability）主要关注的是软件层面，即 CUDA 程序可以利用的 GPU 功能和指令集。
+
+编译指令（指定虚拟架构计算能力）：
+
+```shell
+-arch=compute_XY
+nvcc helloworld.cu –o helloworld -arch=compute_61
+```
+
+XY：第一个数字X代表计算能力的主版本号，第二个数字Y代表计算能力的次版本号
+
+PTX的指令只能在更高的计算能力的GPU使用，上面的例子编译出的可执行文件helloworld可以在计算能力>=6.1的GPU上面执行，在计算能力小于6.1的GPU则不能执行。
+
+从工程实践角度说，最好低一点，便于可以在更多设备上成功运行，如果可以确定实际要运行的GPU版本，最好指定当前GPU真实架构计算能力为虚拟架构计算能力，以便于更好的匹配设备
+
+## 指定真实架构计算能力
+
+PTX指令转化为二进制cubin代码与具体的GPU架构有关，真实架构指的是 GPU 的物理硬件架构，如 NVIDIA 的 Pascal、Volta、Turing 或 Ampere，真实架构决定了 GPU 的物理构造，包括核心数量、内存带宽、功耗、制程技术等。
+
+虽然真实架构与虚拟架构紧密相关，但它们不是同一回事。一个真实架构（例如 Turing）可以支持多个计算能力版本
+
+编译指令（指定真实架构计算能力）
+
+```shell
+-code=sm_XY
+```
+
+XY：第一个数字X代表计算能力的主版本号，第二个数字Y代表计算能力的次版本号
+**注意**
+
+1. 二进制cubin代码，大版本之间不兼容！！！
+2. 指定真实架构计算能力的时候必须指定虚拟架构计算能力！！！
+3. **指定的真实架构能力必须大于或等于虚拟架构能力！！！**
+4. 真实架构可以实现低小版本到高小版本的兼容！
+
+## 指定多个GPU版本编译
+
+为了使得编译出来的可执行文件可以在多GPU中执行，可以同时指定多组计算能力：
+编译选项
+
+```shell
+-gencode arch=compute_XY –code=sm_XY
+```
+
+例如：
+
+```shell
+nvcc ex1.cu -o ex1_fat -gencode=arch=compute_35,code=sm_35 -gencode=arch=compute_50,code=sm_50 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_70,code=sm_70
+```
+
+这样子编译出的文件可以同时在这些GPU上执行
+
+-gencode=arch=compute_35,code=sm_35 开普勒架构
+-gencode=arch=compute_50,code=sm_50 麦克斯韦架构
+-gencode=arch=compute_60,code=sm_60 帕斯卡架构
+-gencode=arch=compute_70,code=sm_70 伏特架构
+
+编译出的可执行文件包含4个二进制版本，生成的可执行文件称为胖二进制文件（fatbinary）
+
+注意
+
+1. 执行上述指令必须CUDA版本支持7.0计算能力，否则会报错
+2. 过多指定计算能力，会增加编译时间和可执行文件的大小
+
+## NVCC即时编译
+
+NVCC 支持即时编译（JIT, Just-In-Time Compilation），这是一种在运行时而非传统的编译时对程序进行编译的过程
+
+在可执行文件中保留PTX代码，当运行可执行文件时，从保留的PTX代码临时编译出cubin文件
+
+nvcc编译指令指定所保留的PTX代码虚拟架构：
+
+```shell
+ -gencode arch=compute_XY ,code=compute_XY
+```
+
+- **编译过程**: 当 CUDA 程序运行时，NVCC 即时编译器可以根据运行时的环境（尤其是目标 GPU 的计算能力）动态编译 CUDA 核心（kernel）。
+- **PTX 代码**: NVCC 通常首先将 CUDA C/C++ 代码编译成中间形式的 PTX （Parallel Thread Execution）代码。PTX 是一种 GPU 上的伪汇编语言，允许更多的硬件独立性。
+- **SASS 代码**: 在程序运行时，根据具体的 GPU 架构，PTX 代码会被进一步编译为具体的 SASS（Streaming ASSembler）代码，即真实的 GPU 指令。
+
+缺点是可能不能充分利用GPU架构的计算性能，并且会增加程序的启动时间，因为编译发生在运行时
+
+注意
+
+- 两个计算能力都是虚拟架构计算能力
+- 两个虚拟架构计算能力必须一致
+
+一致的原因，举个例子，比较新的安培（Ampere）架构版本号是8，我的电脑是帕斯卡（Pascal）架构版本号是6，我的电脑直接编译是不能在安培架构上运行的，设置即时编译，就可以在生成的可执行文件中嵌入PTX代码，在安培架构上运行时，就可以直接在安培架构上运行PTX代码，但是有可能无法充分利用安培架构性能
+
+![CUDA_7](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_7.png)
+
+## nvcc编译默认计算能力
+
+不同版本CUDA编译器在编译CUDA代码时，都有一个默认计算能力，我们如果不声明计算能力版本号，nvcc会根据CUDA版本自动设置
+
+- CUDA 6.0及更早版本： 默认计算能力1.0
+- CUDA 6.5~CUDA 8.0： 默认计算能力2.0
+- CUDA 9.0~CUDA 10.2： 默认计算能力3.0
+- CUDA 11.6： 默认计算能力5.2
 
 # CUDA的矩阵乘法计算实现
 
@@ -118,6 +383,203 @@ cudaDeviceSynchronize();这条语句调用了CUDA运行时的API函数，去掉�
 ![AutoDriverHeart_TensorRT_L2_26](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_26.png)
 
 程序端可以调用三种层级的CUDA API，但是基本上只调用相对顶层的API（除去Driver这个很底层的）
+
+所以我们实现一个CUDA的程序，大概就是先设置GPU设备，这可以通过运行时API来实现，比如说查看GPU数量，确定使用哪一个GPU进行计算
+
+步骤如下
+
+1. 设置GPU设备，决定哪些GPU进行计算
+2. 在主机端分配主机和设备内存
+3. 初始化主机中的数据，把我们想计算的数据存入主机内存
+4. 数据通过使用运行时API从主机复制到设备，因为GPU在运行时核函数只能直接访问显存中的数据
+5. 调用核函数在设备中进行计算
+6. 将计算得到的数据从设备传送到主机，通过PCIE总线实现
+7. 释放主机和设备内存
+
+## 设置GPU设备
+
+![CUDA_8](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_8.png)
+
+### 获取GPU设备数量
+
+这里涉及两个运行时API函数
+
+```c++
+int iDeviceCount = 0;
+cudaError_t error=cudaGetDeviceCount(&iDeviceCount);
+```
+
+`cudaGetDeviceCount`是一个可以在主机或者设备上运行的函数，作用是修改传入int类型指针变量的值，使其等于可使用的GPU数量
+
+注意一下，几乎每一个运行时API都有一个返回值，这个返回值定义为cudaError_t，作用是返回一个错误代码，通过返回不同的错误代码，提供关于函数调用是否成功执行的状态信息
+
+`cudaError_t`是一个枚举类型，它定义了各种可能的错误代码。这些错误代码可以用来表示各种情况，比如内存分配失败、非法操作、设备不支持等等。通过检查这些返回值，开发者可以得知自己的CUDA代码是否正确执行，如果出现问题，可以根据错误代码进行调试和修复。
+
+例如，如果一个CUDA函数调用返回了`cudaSuccess`，这意味着函数调用成功完成。如果返回了其他值，如`cudaErrorMemoryAllocation`，则表明在内存分配时出现了问题。
+
+### 设置GPU执行时使用的设备
+
+代码如下
+
+```c++
+int iDev = 0;
+cudaSetDevice(iDev);
+```
+
+我们要将其设置为我们想要使用的GPU的索引号
+
+这是一个只能在主机函数中使用的函数
+
+### 示例
+
+```c++
+#include <stdio.h>
+
+int main(void)
+{
+    // 检测计算机GPU数量
+    int iDeviceCount = 0;
+    cudaError_t error = cudaGetDeviceCount(&iDeviceCount);
+    
+    if (error != cudaSuccess || iDeviceCount == 0)//判断是否成功获得GPU数量且数量不为0
+    {
+        printf("No CUDA campatable GPU found!\n");
+        exit(-1);
+    }
+    else
+    {
+        printf("The count of GPUs is %d.\n", iDeviceCount);
+    }
+    
+    // 设置执行
+    int iDev = 0;
+    error = cudaSetDevice(iDev);
+    if (error != cudaSuccess)
+    {
+        printf("fail to set GPU 0 for computing.\n");
+        exit(-1);
+    }
+    else
+    {
+        printf("set GPU 0 for computing.\n");
+    }
+
+    return 0;
+}
+```
+
+## 内存管理
+
+CUDA 通过内存分配（开辟内存空间）、数据传递、内存初始化、内存释放进行内存管理，且CUDA内存管理函数与标准C的内存管理函数非常相似，就是在标准C的内存管理函数前面加上cuda
+
+| 标准C函数 | CUDA C函数 |     功能     |
+| :-------: | :--------: | :----------: |
+|  malloc   | cudaMalloc |  内存的分配  |
+|  memcpy   | cudaMemcpy |  数据的传递  |
+|  memset   | cudaMemset | 内存的初始化 |
+|   free    |  cudaFree  |  内存的释放  |
+
+### 内存分配函数
+
+主机分配内存：`extern void *malloc(unsigned int num_bytes);`
+
+代码： 
+
+```c++
+float *fpHost_A;
+fpHost_A = (float *)malloc(nBytes);
+```
+
+设备分配内存：此函数可以在主机和设备上使用，返回值也是cudaError_t类型
+
+```c++
+float *fpDevice_A;
+cudaMalloc((float**)&fpDevice_A, nBytes);
+cudaError_t cudaMalloc(void **devPtr, size_t size);
+```
+
+**参数**
+
+- **devPtr**: 是一个指向分配的设备内存的指针的指针，是一个双重指针。这个指针是在调用 `cudaMalloc` 后设置的，用于在之后的 CUDA 函数调用中引用这块内存。
+- **size**: 需要分配的内存字节数。它指定了在设备上分配多少内存。
+
+### 数据拷贝
+
+在主机的标准C语言中，我们只需要指定数据的原位置和目的位置就可以，然后就可以完成主机数据的拷贝
+
+设备数据的拷贝，只能在主机端完成
+
+```c++
+cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, cudaMemcpyKind kind);
+```
+
+**参数**
+
+- **dst**: 目标内存地址。这可以是设备内存地址或主机内存地址，取决于拷贝方向。
+- **src**: 源内存地址。与目标地址一样，这也可以是设备或主机内存地址。
+- **count**: 要复制的字节数。
+- **kind**: 数据传输的方向。它是一个 `cudaMemcpyKind` 枚举类型，指定数据是从主机复制到设备(`cudaMemcpyHostToDevice`)，从设备复制到主机 (`cudaMemcpyDeviceToHost`)，还是设备之间(`cudaMemcpyDeviceToDevice`) 的复制，或者主机到主机（`cudaMemcpyHostToHost`）。当然也可以设置`cudaMemcpyDefault`也就是默认值，会根据我们实际传入的数据判断是哪一种方式，但是默认方式只支持在统一虚拟寻址的系统上使用，否则会报错
+
+下面是一个例程，从主机复制到设备，是先开辟，然后得到指向新空间的指针，然后拷贝
+
+```c++
+float *h_array = (float *)malloc(size * sizeof(float));
+float *d_array;
+cudaMalloc((void **)&d_array, size * sizeof(float));
+
+// 从主机内存复制到设备内存
+cudaMemcpy(d_array, h_array, size * sizeof(float), cudaMemcpyHostToDevice);
+```
+
+### 内存初始化
+
+这一步的目标是将申请开辟的新空间初始化，设备内存初始化函数只能在主机调用
+
+```c
+cudaError_t cudaMemset(void *devPtr, int value, size_t count);
+```
+
+参数
+
+- **devPtr**: 指向需要初始化的设备内存的指针。
+- **value**: 要设置的值。这个值是一个整数，但实际上它会被转换成一个无符号字符（`unsigned char`），并用这个字符的值来填充内存。这意味着实际设置的值是`value`的低8位。
+- **count**: 要设置的字节数。
+
+例如，如果你想在设备内存中分配一个float类型数组，并将每个元素初始化为0，可以这样做：
+
+```c
+float *d_array;
+size_t size = 100 * sizeof(float); // 假设我们需要100个float
+
+// 在设备上分配内存
+cudaMalloc((void **)&d_array, size);
+
+// 将设备内存初始化为0
+cudaMemset(d_array, 0, size);
+```
+
+注意事项
+
+1. **内存类型**: `cudaMemset`仅适用于设备内存，不能用于主机内存。
+2. **值的限制**: 由于`value`参数实际上是作为一个无符号字符处理的，因此只能用来设置0到255之间的值。
+3. **同步性**: `cudaMemset`在默认情况下是阻塞的，即它会等待操作完成才返回控制权给CPU。如果需要异步执行，可以使用`cudaMemsetAsync`函数，但这需要配合CUDA流（`cudaStream_t`）使用。
+4. **错误处理**: 检查函数返回的状态，确保内存设置操作成功。
+
+### 内存释放
+
+```c++
+cudaError_t cudaFree(void *devPtr);
+```
+
+- **devPtr**: 指向需要释放的设备内存的指针。
+
+注意事项
+
+1. **仅设备内存**: `cudaFree`仅适用于释放使用CUDA内存分配函数（如`cudaMalloc`）分配的设备内存。不应该用它来释放在主机上分配的内存（使用`free`或`delete`）。
+2. **重复释放**: 避免对同一内存地址进行重复释放，这可能导致不可预测的行为。
+3. **空指针**: 如果传递给`cudaFree`的指针是`NULL`，那么操作没有效果，也不会报错。
+4. **错误处理**: 检查`cudaFree`的返回值，确保释放操作成功。如果释放失败，这通常指示程序中存在更严重的问题，如非法内存访问。
+5. **内存管理**: 在大型应用中，合理管理内存分配和释放是至关重要的。不仅要确保每次`cudaMalloc`调用都有相应的`cudaFree`调用，还要注意在程序的适当位置进行这些调用，以避免内存泄漏。
 
 ## 计算过程
 
@@ -141,8 +603,134 @@ GPU的warmup：GPU在启动的时候是有一个延时的，会干扰对算法�
 
 ## 程序
 
-定义在GPU上的函数有几种
+这里借用了B站权双大佬的开源程序进行讲解
 
-- `__global__`：定义核函数，在GPU上执行，从CPU端通过三重括号的语法调用，可以有参数，不可以有返回值
-- `__device__`：定义设备函数，在GPU上调用也在GPU上执行，不需要三重括号，与普通函数一样，可以有参数，有返回值
-- 总的来说，host可以调用global，global可以调用device，device也可以调用device
+首先我们导入头文件，其中我们将设置GPU的函数放入common.cuh头文件中，比如说检测GPU的数量并且设置0号GPU为使用的GPU
+
+```
+#include <stdio.h>
+#include "../tools/common.cuh"
+```
+
+然后我们从main函数开始看
+
+```c++
+
+```
+
+
+
+```c++
+#include <stdio.h>
+#include "../tools/common.cuh"
+
+__global__ void addFromGPU(float *A, float *B, float *C, const int N)
+{
+    const int bid = blockIdx.x;
+    const int tid = threadIdx.x;
+    const int id = tid + bid * blockDim.x; 
+
+    C[id] = A[id] + B[id];//每个线程计算一次加法
+    
+}
+
+void initialData(float *addr, int elemCount)
+{
+    for (int i = 0; i < elemCount; i++)
+    {
+        addr[i] = (float)(rand() & 0xFF) / 10.f;
+        //随机产生一个数据，然后进行按位与，得到一个不大于255的数，转换为float类型并且除以10，然后复制到数组中去
+    }
+    return;
+}
+
+int main(void)
+{
+    // 1、设置GPU设备
+    setGPU();
+
+    // 2、分配主机内存和设备内存，并初始化
+	// 我们定义一个一维数组，元素数量512
+    int iElemCount = 512;                               // 设置元素数量
+    size_t stBytesCount = iElemCount * sizeof(float);   // 计算总的字节数
+    
+    // （1）分配主机内存，并初始化
+    float *fpHost_A, *fpHost_B, *fpHost_C;
+	//根据总字节数，开辟内存
+    fpHost_A = (float *)malloc(stBytesCount);
+    fpHost_B = (float *)malloc(stBytesCount);
+    fpHost_C = (float *)malloc(stBytesCount);
+    if (fpHost_A != NULL && fpHost_B != NULL && fpHost_C != NULL)
+    //三个指针都不为空的时候就说明成功了
+    {
+        memset(fpHost_A, 0, stBytesCount);  // 所有的开辟的主机内存初始化为0
+        memset(fpHost_B, 0, stBytesCount);
+        memset(fpHost_C, 0, stBytesCount);
+    }
+    else
+    {//如果失败就输出信息并且退出
+        printf("Fail to allocate host memory!\n");
+        exit(-1);
+    }
+
+    // （2）分配设备内存，并初始化，流程与主机一致
+    float *fpDevice_A, *fpDevice_B, *fpDevice_C;
+    cudaMalloc((float**)&fpDevice_A, stBytesCount);
+    cudaMalloc((float**)&fpDevice_B, stBytesCount);
+    cudaMalloc((float**)&fpDevice_C, stBytesCount);
+    if (fpDevice_A != NULL && fpDevice_B != NULL && fpDevice_C != NULL)
+    {
+        cudaMemset(fpDevice_A, 0, stBytesCount);  // 设备内存初始化为0
+        cudaMemset(fpDevice_B, 0, stBytesCount);
+        cudaMemset(fpDevice_C, 0, stBytesCount);
+    }
+    else
+    {
+        printf("fail to allocate memory\n");
+        free(fpHost_A);
+        free(fpHost_B);
+        free(fpHost_C);
+        exit(-1);
+    }
+
+    // 3、初始化主机中数据
+    srand(666); // 设置随机种子
+    initialData(fpHost_A, iElemCount);//进入初始化函数
+    initialData(fpHost_B, iElemCount);
+    
+    // 4、数据从主机复制到设备
+    cudaMemcpy(fpDevice_A, fpHost_A, stBytesCount, cudaMemcpyHostToDevice); 
+    cudaMemcpy(fpDevice_B, fpHost_B, stBytesCount, cudaMemcpyHostToDevice); 
+    cudaMemcpy(fpDevice_C, fpHost_C, stBytesCount, cudaMemcpyHostToDevice);
+
+
+    // 5、调用核函数在设备中进行计算
+    dim3 block(32);//每个线程块有32个线程
+    dim3 grid(iElemCount / 32);//然后配置相应数量的线程块
+
+    addFromGPU<<<grid, block>>>(fpDevice_A, fpDevice_B, fpDevice_C, iElemCount);    // 调用核函数，传入地址
+    cudaDeviceSynchronize();
+    //实际上这里的同步函数可以删除，因为cudaMemcpy有隐式的同步功能
+    
+    // 6、将计算得到的数据从设备传给主机
+    cudaMemcpy(fpHost_C, fpDevice_C, stBytesCount, cudaMemcpyDeviceToHost);
+
+
+    for (int i = 0; i < 10; i++)    // 打印
+    {
+        printf("idx=%2d\tmatrix_A:%.2f\tmatrix_B:%.2f\tresult=%.2f\n", i+1, fpHost_A[i], fpHost_B[i], fpHost_C[i]);
+    }
+
+    // 7、释放主机与设备内存
+    free(fpHost_A);
+    free(fpHost_B);
+    free(fpHost_C);
+    cudaFree(fpDevice_A);
+    cudaFree(fpDevice_B);
+    cudaFree(fpDevice_C);
+
+    cudaDeviceReset();
+    return 0;
+}
+```
+
