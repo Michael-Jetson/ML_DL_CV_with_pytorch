@@ -612,13 +612,7 @@ GPU的warmup：GPU在启动的时候是有一个延时的，会干扰对算法�
 #include "../tools/common.cuh"
 ```
 
-然后我们从main函数开始看
-
-```c++
-
-```
-
-
+然后我们看
 
 ```c++
 #include <stdio.h>
@@ -730,7 +724,55 @@ int main(void)
     cudaFree(fpDevice_C);
 
     cudaDeviceReset();
+    //将相关的GPU重置
     return 0;
 }
 ```
 
+## 设备函数
+
+- 设备函数（device function）
+  1. 定义只能执行在GPU设备上的函数为设备函数
+  2. 设备函数只能被核函数或其他设备函数调用
+  3. 设备函数用 __device__ 修饰
+
+- 核函数（kernel function）
+  1. 用 __global__ 修饰的函数称为核函数，一般由主机调用，在设备中执行
+  2. __global__ 修饰符既不能和__host__同时使用，也不可与__device__ 同时使用
+
+- 主机函数（host function）
+  1. 主机端的普通 C++ 函数可用 __host__ 修饰
+  2. 对于主机端的函数， __host__修饰符可省略
+  3. 可以用 __host__ 和 __device__ 同时修饰一个函数减少冗余代码。编译器会针对主机和设备分别编译该函数。
+
+## 注意
+
+我们前面是使用了512个元素，分为了16个线程块，每个线程块32个线程，但是实际上并不是每一次都是可以整除的，比如说我们有513个元素，需要513个线程，就需要17个线程块去执行，但是这就导致了544个线程，所以我们需要进行id判断
+
+```c++
+__global__ void addFromGPU(float *A,float *B,float *C,const int N)
+{
+    const int bid=blockIdx.x;
+    const int tid=threadId.x;
+    const int id = tid+bid*blockDim.x;
+    if(id>=N) return;
+    C[id]=A[id]+B[id];
+}
+```
+
+这样可以保证超出数量的时候会退出核函数
+
+# 错误检测
+
+介绍检查CUDA的错误代码并且debug
+
+## 运行时API错误代码
+
+CUDA运行时API大多支持返回错误代码，返回值类型是枚举变量：cudaError_t，运行时API成功执行，返回值为cudaSuccess
+
+## 错误检查函数
+
+在检查错误的时候，我们会用到两个函数
+
+- cudaGetErrorName
+- cudaGetErrorString

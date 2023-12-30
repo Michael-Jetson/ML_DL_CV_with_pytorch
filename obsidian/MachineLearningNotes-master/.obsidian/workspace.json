@@ -1,0 +1,161 @@
+{
+  "main": {
+    "id": "5f25edc31f6a0999",
+    "type": "split",
+    "children": [
+      {
+        "id": "a04ca1f315ab54fb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "32c387268e30f152",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2.LinearRegression.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0b5688a14f5eb97d",
+    "type": "split",
+    "children": [
+      {
+        "id": "ce88dab5d41c8ed6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "30711e5ba3841d7b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "0b6e3d94627fc7c5",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "255d9ce251f2f913",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "1e4f76cd4a8b267e",
+    "type": "split",
+    "children": [
+      {
+        "id": "062f68d28e34bbe8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7e3c5695c39cc239",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "2.LinearRegression.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "3ac7a237d252d5b4",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "2.LinearRegression.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "f689596e46704ec6",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "9077697b39eceefb",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "2.LinearRegression.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "32c387268e30f152",
+  "lastOpenFiles": [
+    "3.LinearClassification.md",
+    "2.LinearRegression.md",
+    "1.Intro_Math.md",
+    "README.md",
+    "pdf/1.Intro_Math.pdf",
+    "originVSdual.jpg",
+    "21.NN.md",
+    "16.GaussianNetwork.md",
+    "15.CRF.md"
+  ]
+}

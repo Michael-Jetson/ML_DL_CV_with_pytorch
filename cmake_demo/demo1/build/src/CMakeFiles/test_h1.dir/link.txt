@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtest_h1.a  CMakeFiles/test_h1.dir/demo1.cpp.o
+/usr/bin/ranlib libtest_h1.a

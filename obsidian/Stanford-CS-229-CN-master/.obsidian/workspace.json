@@ -1,0 +1,160 @@
+{
+  "main": {
+    "id": "9511cf64c372ca74",
+    "type": "split",
+    "children": [
+      {
+        "id": "902f2e439400c9b0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "576e6707f3d84dfc",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Markdown/cs229-notes1.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "17145b07c69429fa",
+    "type": "split",
+    "children": [
+      {
+        "id": "b81398064a3fe544",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "52321e50bdc4cbcf",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "7175237721854f83",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "0de09c9f51e398d3",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "e9ca73b0c4b9458e",
+    "type": "split",
+    "children": [
+      {
+        "id": "e52f873c51e9bb23",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "30b732a2ac650ad1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Markdown/cs229-notes1.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "0f8e2c0c144911ee",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Markdown/cs229-notes1.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "42f83cace5520d8a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "8ea3e9401cb5b960",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Markdown/cs229-notes1.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "576e6707f3d84dfc",
+  "lastOpenFiles": [
+    "Markdown/cs229-notes2.md",
+    "Markdown/cs229-notes1.md",
+    "Markdown/cs229-gaussian_processes.md",
+    "Markdown/cs229-hoeffding.md",
+    "Markdown/cs229-loss-functions.md",
+    "Markdown/cs229-boosting.md",
+    "中文翻译中/cs229-notes1.pdf"
+  ]
+}
