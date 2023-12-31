@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/hello.dir/main.cpp.o  -o hello src/libtest_h1.a 

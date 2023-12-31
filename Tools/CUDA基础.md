@@ -173,6 +173,8 @@ int main(void)
 }
 ```
 
+这里注意一下，输出的序号不一定是有序的，这反映了CUDA 程序执行时的一个很重要的特征，即每个线程块的计算是相互独立的。不管完成计算的次序如何，每个线程块中的每个线程都进行一次计算。
+
 ## 多维线程模型
 
 CUDA最多可以组织三维的网格和线程块，blockIdx和threadIdx是类型为uint3的变量，该类型是一个结构体，具有x,y,z三个成员（3个成员都为无符号类型的成员构成）
@@ -213,6 +215,12 @@ tid就是每个线程块中线程的索引，bid是一个网格中线程块的�
 并且注意一下数量有限制
 
 ![CUDA_4](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_4.png)
+
+## 组织线程模型
+
+数据在内存中是以线性、以行为主的方式存储，实际上C++中也是如此，而在MATLAB中是列为主
+
+
 
 ## block和thread的索引与遍历
 
@@ -601,7 +609,7 @@ CUDA中有个规定，就是一个block中可以分配的thread的数量最大�
 
 GPU的warmup：GPU在启动的时候是有一个延时的，会干扰对算法执行时间的测量，所以可以先启动GPU让其完成一点任务，然后再测量
 
-## 程序
+## 程序流程
 
 这里借用了B站权双大佬的开源程序进行讲解
 
@@ -762,9 +770,81 @@ __global__ void addFromGPU(float *A,float *B,float *C,const int N)
 
 这样可以保证超出数量的时候会退出核函数
 
-# 错误检测
+## 二维矩阵计算代码
 
-介绍检查CUDA的错误代码并且debug
+我们这里会实现一个二维矩阵的GPU计算
+
+我们注意一下，开辟空间的时候，GPU上要开辟三个内存空间，两个是需要计算的矩阵，一个是存储结果矩阵的
+
+```c++
+#include "stdio.h"
+
+/* matmul的函数实现*/
+__global__ void MatmulKernel(float *M_device, float *N_device, float *P_device, int width){
+    /* 
+        我们设定每一个thread负责P中的一个坐标的matmul
+        所以一共有width * width个thread并行处理P的计算
+    */
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    float P_element = 0;
+
+    /* 对于每一个P的元素，我们只需要循环遍历width次M和N中的元素就可以了*/
+    for (int k = 0; k < width; k ++){
+        float M_element = M_device[y * width + k];
+        float N_element = N_device[k * width + x];
+        P_element += M_element * N_element;
+    }
+
+    P_device[y * width + x] = P_element;
+}
+
+/*
+    CUDA中使用block对矩阵中某一片区域进行集中计算。这个类似于loop中的tile
+    感兴趣的同学可以试着改一下blockSize，也就是tileSize，看看速度会发生什么样子的变化
+    当blockSize达到一个数量的时候，这个程序会出错。下一个案例中我们会分析
+*/
+void MatmulOnDevice(float *M_host, float *N_host, float* P_host, int width, int blockSize){
+    /* 设置矩阵大小 */
+    int size = width * width * sizeof(float);
+
+    /* 分配M, N在GPU上的空间*/
+    float *M_device;
+    float *N_device;
+
+    cudaMalloc(&M_device, size);
+    cudaMalloc(&N_device, size);
+
+    /* 分配M, N拷贝到GPU上*/
+    cudaMemcpy(M_device, M_host, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(N_device, N_host, size, cudaMemcpyHostToDevice);
+
+    /* 分配P在GPU上的空间*/
+    float *P_device;
+    cudaMalloc(&P_device, size);
+
+    /* 调用kernel来进行matmul计算, 在这个例子中我们用的方案是：将一个矩阵切分成多个blockSize * blockSize的大小 */
+    dim3 dimBlock(blockSize, blockSize);
+    dim3 dimGrid(width / blockSize, width / blockSize);
+    MatmulKernel <<<dimGrid, dimBlock>>> (M_device, N_device, P_device, width);
+
+    /* 将结果从device拷贝回host*/
+    cudaMemcpy(P_host, P_device, size, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+
+    /* Free */
+    cudaFree(P_device);
+    cudaFree(N_device);
+    cudaFree(M_device);
+}
+```
+
+
+
+# 错误检测与计时、信息查询
+
+介绍检查CUDA的错误代码的方法并且debug，还有计时的方法，并且查询GPU信息
 
 ## 运行时API错误代码
 
@@ -775,4 +855,133 @@ CUDA运行时API大多支持返回错误代码，返回值类型是枚举变量�
 在检查错误的时候，我们会用到两个函数
 
 - cudaGetErrorName
+  - 功能：这个函数用于获取指定错误代码的名称。在CUDA编程中，许多函数调用会返回一个错误代码（`cudaError_t`类型）。`cudaGetErrorName`函数可以将这个错误代码转换为一个易于理解的字符串名称，帮助开发者快速识别出错的类型。
+  - 用法：`const char* cudaGetErrorName(cudaError_t error)`
+  - 示例：如果您有一个错误代码`error`，您可以这样调用此函数：`const char* errorName = cudaGetErrorName(error);`然后`errorName`将包含该错误的名称。
 - cudaGetErrorString
+  - 功能：与`cudaGetErrorName`类似，`cudaGetErrorString`函数用于获取详细的错误描述。它提供了关于发生的错误更具体的信息，这有助于调试和解决问题。
+  - 用法：`const char* cudaGetErrorString(cudaError_t error)`
+  - 示例：使用方法和`cudaGetErrorName`相似，例如：`const char* errorDescription = cudaGetErrorString(error);`将返回一个详细描述错误的字符串。
+
+同时我们会自行包装ErrorCheck函数定位问题，或者说使用这个函数对CUDA的运行时函数进行包装，或者说将运行时API的返回值传入此函数进行检查
+
+代码如下
+
+```c++
+cudaError_t ErrorCheck(cudaError_t error_code, const char* filename, const int lineNumber)
+{
+    if (error_code != cudaSuccess)//不成功时才执行
+    {
+        printf("CUDA error:\r\ncode=%d, name=%s, description=%s\r\nfile=%s, line%d\r\n",
+                error_code, cudaGetErrorName(error_code), cudaGetErrorString(error_code), filename, lineNumber);
+        //分别打印错误代码，错误类型，名称，文件名和行数
+        return error_code;
+    }
+    return error_code;
+}
+```
+
+
+
+在调用CUDA运行时API时，调用ErrorCheck这个自定义的函数进行包装，其中参数filename一般使用`__FILE__`这个编译器内部定义的宏，用来返回发生错误的文件名（字符串类型）; 参数lineNumber一般使用`__LINE__`这个宏，返回发生错误的行数
+
+```c++
+ErrorCheck(cudaMalloc(&fpDevice,size),__FILE__,__LINE__)
+```
+
+上面这个例子就是在运行CUDA函数之后，检查函数是否成功执行，如果没有成功执行，错误是什么情况
+
+## 检查核函数
+
+但是错误检查函数有不足，就是不能检查核函数的相关错误，这是因为核函数的返回值是void，也就是没有实际的返回值，不会返回错误代码，所以我们需要想办法检查核函数中的错误
+
+`cudaGetLastError()` 是一个非常有用的 CUDA 运行时API函数，用于获取最后一个发生的错误代码。在 CUDA 编程中，由于核函数调用是异步的，这个函数尤其重要，因为它可以帮助检测核函数执行过程中的错误。
+
+我们可以在核函数后面加上两段代码
+
+```c++
+ErrorCheck(cudaGetLastError(), __FILE__, __LINE__);
+ErrorCheck(cudaDeviceSynchronize(), __FILE__, __LINE__);
+```
+
+这样就可以检查同步代码之上的最后一个错误，因为CPU和GPU是异步的，运行核函数之后主机会执行其他的代码，不会等待核函数执行完毕，所以需要调用同步函数来同步主机和设备
+
+## GPU计时之事件计时
+
+计时是很重要的，可以测试程序的性能
+
+这里主要是介绍CUDA的事件（event）计时，可以为主机代码和设备代码计时
+
+1. **事件**:
+
+   CUDA事件是用于标记CUDA流中的特定点的对象。它们可以用于测量两个事件之间的时间差，这对于评估GPU操作的性能非常有用。
+
+2. **流**:
+
+   CUDA流代表一个由CUDA操作（如核函数执行、内存传输）组成的序列，这些操作在GPU上按顺序执行，但可以与其他流并行执行。
+
+步骤
+
+1. **创建事件**: 使用 `cudaEventCreate()` 创建事件对象。通常需要创建两个事件，一个用于标记开始，另一个用于标记结束。
+
+   ```c++
+   cudaEvent_t start, stop;
+   cudaEventCreate(&start);
+   cudaEventCreate(&stop);
+   ```
+
+2. **记录事件**: 在需要测量的代码段的开始和结束处分别记录事件。使用 `cudaEventRecord()` 函数标记事件。
+
+   ```c++
+   cudaEventRecord(start);
+   // ... 需要测量的代码 ...
+   cudaEventRecord(stop);
+   ```
+
+3. **等待事件完成**: 使用 `cudaEventSynchronize()` 等待事件完成。这对于结束事件尤其重要，以确保所有操作都完成了。
+
+   ```c++
+   cudaEventSynchronize(stop);
+   ```
+
+4. **计算时间差**: 使用 `cudaEventElapsedTime()` 计算两个事件之间的时间差。这个函数返回的时间单位是毫秒（ms）。
+
+   ```c++
+   float milliseconds = 0;
+   cudaEventElapsedTime(&milliseconds, start, stop);
+   ```
+
+5. **销毁事件**: 最后，使用 `cudaEventDestroy()` 销毁事件对象，以释放资源。
+
+   ```c++
+   cudaEventDestroy(start);
+   cudaEventDestroy(stop);
+   ```
+
+不过注意一下，核函数第一次启动的时候可能会很耗时，会不准，所以可以在一个循环中多次测量，舍弃第一次测量的结果并且取平均值
+
+## GPU计时之nvprof
+
+这是 NVIDIA CUDA 工具套件中的一个性能分析工具（或者说是一个可执行文件）。它用于分析 CUDA 应用程序的性能，提供了深入的时间和执行分析，包括对核函数的执行时间、内存访问模式以及其他各种性能指标的详细分析。
+
+在命令行的执行命令如下
+
+```shell
+nvprof ./exe_name
+```
+
+## GPU信息查询
+
+我们可以通过查询GPU的各种参数，以此配置合适的程序，最大限度的发挥GPU的性能
+
+涉及的运行时API函数如下，只能在主机上调用
+
+```c++
+cudaDeviceProp prop;
+cudaGetDeviceProperties(&prop,device_id);
+//device id是int类型变量，代表GPU索引
+```
+
+函数返回值类型是cudaError_t，用于获取有关GPU的详细信息，并且保存到`cudaDeviceProp`类型的结构体中
+
+但是运行时API无法查询GPU核心数量，所以只能根据GPU的计算能力进行查询

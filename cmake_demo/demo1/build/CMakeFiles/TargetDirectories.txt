@@ -1,6 +1,0 @@
-/home/ncepu/Project/cmake_demo/demo1/build/CMakeFiles/rebuild_cache.dir
-/home/ncepu/Project/cmake_demo/demo1/build/CMakeFiles/hello.dir
-/home/ncepu/Project/cmake_demo/demo1/build/CMakeFiles/edit_cache.dir
-/home/ncepu/Project/cmake_demo/demo1/build/src/CMakeFiles/rebuild_cache.dir
-/home/ncepu/Project/cmake_demo/demo1/build/src/CMakeFiles/test_h1.dir
-/home/ncepu/Project/cmake_demo/demo1/build/src/CMakeFiles/edit_cache.dir
