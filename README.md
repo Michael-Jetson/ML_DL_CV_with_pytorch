@@ -6,10 +6,10 @@
 
 ```shell
 .
-├── c++
-├── cmake_demo
-├── EECS498
-├── data_structure
+├── AutoDriving
+├── CUDA
+├── ComputerGraphic
+├── ComputerVision
 ├── git_img
 ├── Java
 ├── img_cls
@@ -20,13 +20,12 @@
 └── scripts
 ```
 
-- cmake_demo是使用cmake进行C++编程的练习例程
-- EECS498是在大佬开源笔记上进行修改的笔记，内容是参考密歇根大学EECS498（CS231N课程的扩充版）进行修改的
-- data_structure是使用Python完成的数据结构练习
+- AutoDriving：自动驾驶方面的笔记，目前主要是记录Autoware软件用法
+- CUDA：CUDA并行计算笔记
+- ComputerGraph：计算机图形学笔记，主要是参考Games101，未更完
+- ComputerVision：一个很综合的深度学习与计算机视觉笔记，主体是学习EECS498并且大佬开源笔记上进行修改的，主要参考密歇根大学EECS498（CS231N课程的扩充版）
+- MultiModel：参考CMU的MMML课程，没有更新完
 - git_img是git笔记中图片保存的位置
-- Java是随手编写的Java程序
-- Jupyter是基于torch完成的机器学习/深度学习项目，编辑器为Jupyter Notebook
-- Obsidian是使用Obsidian笔记本写的笔记（包括他人的笔记）
 - pytorch_image_classification是一个基于pytorch的图像分类数据集
 - scripts是随意编写的Python脚本
 - img_cls是一个使用不同网络进行图像分类的简单项目，个人感觉这是一个很标准的小项目
