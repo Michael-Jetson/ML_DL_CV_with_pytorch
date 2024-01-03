@@ -1136,9 +1136,115 @@ CUDA编程模型向开发者提供了更多控制权，来显式地控制内存�
 - 内存：最下层，通过PCIE总线链接GPU，可以与多种内存直接通信
 - 寄存器：这是线程独有的，每个线程只能访问属于自己的寄存器，或者可以理解为局部内存，延迟最低、带宽最大
 - 本地内存：也叫局部内存，是线程独有的，但是速度相比寄存器慢了很多
-- 常量内存：所有线程可以读取，但是不能修改
-- 纹理内存：所有线程可以读取，但是不能修改
+- 常量内存：所有线程可以读取，但是不能修改，用于避免线程读数据冲突
+- 纹理内存：所有线程可以读取，但是不能修改，tex可以实现硬件插值
 - 全局内存：可以被所有的线程读取和修改，是GPU中最大的内存
 - 共享内存：在线程块内共享，此线程块内所有的线程都可以访问和进行读写，并且与其他线程进行数据交互，并且共享内存是片上内存，离处理器比较近，延迟低、带宽大、具有高速缓存的特性，需要频繁访问的数据可以保存至此，以提供程序效率
 
 ![CUDA_18](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_18.png)
+
+## 寄存器和局部内存
+
+寄存器是片内存储器，速度更快，并为线程独有，带宽大，局部内存就，性质如下
+
+![CUDA_19](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_19.png)
+
+共享内存在核函数内是可以定义的，使用限定符shield修饰的变量，就会保存在共享内存中的，不加限定符的变量和内建变量都是保存在寄存器中的
+
+但是数组不一样，数组会占用大量内存，如果不加限定，可能出现在寄存器中或者本地内存中
+
+寄存器的参数和性质如下
+
+![CUDA_20](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_20.png)
+
+共享内存是寄存器的扩展，会存放寄存器放不下的数据，具体情况如下图所示
+
+![CUDA_21](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_21.png)
+
+当然本地内存也有各种限制
+
+- 每个线程最多使用512KB的本地内存
+- 本地内存从硬件角度看只是全局内存的一部分，延迟也较高，过多使用的话也会降低程序性能，我们在设计程序中药尽可能让数据保存在寄存器中
+- 对于计算能力2.0以上的设备，本地内存的数据存储在每个SM的一级缓存和设备的二级缓存中，这样子可以提高程序性能
+
+**寄存器溢出**
+
+每个寄存器的存储是有限制的，比如说64KB是很多GPU的寄存器容量，如果核函数所需的寄存器超出硬件设备支持，数据就会溢出保存到本地内存
+
+寄存器溢出有两种情况：
+
+- 一个流多处理器并行运行了多个线程块/线程束，总的寄存器需求容量大于64KB
+- 单个线程运行所需的寄存器超过255个
+
+寄存器溢出会降低程序运行性能
+
+- 本地内存时全局内存的一部分，延迟较高
+- 寄存器溢出的部分可以进入GPU缓存中，提高性能
+
+## 共享内存
+
+### 基础概念与使用方法
+
+我们来看一个矩阵乘法的例子
+
+当两个矩阵相乘，结果矩阵中的一行元素，会在计算的时候重复加载A矩阵的一行元素，这就很不效率，我们在想能不能读取一次然后反复使用，同样的，在计算结果矩阵的某一列的时候，也会重复读取B矩阵的一列，这对于存放在全局内存中的数据来说，读取是很慢的，会限制程序的性能
+
+![AutoDriverHeart_TensorRT_L2_70](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_70.png)
+
+我们就可以将这种数据，放在里计算单元更近的共享内存中
+
+![AutoDriverHeart_TensorRT_L2_77](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_77.png)
+
+上图左边是安培架构的GPU，右边是SM
+
+左边蓝色的是L2缓存（L2 Cache），这个属于是片上内存
+
+在SM最上面，有一个L1 Cache，或者说是L1指令缓存，最下面是一个L1的数据缓存（L1 Data Cache）或者说Shared Memory，然后里面有四个线程束调度器
+
+内存我们可以分两种，片上内存（on-chip Memory）和片外内存（off-chip Memory），前者的速度更快，但是容量更小，全局内存的延迟最高，`cudaMalloc`函数就是在全局内存上访问
+
+当然，不同架构的带宽不一样，甚至新架构的全局内存的带宽都可以高于老架构的L1 Cache带宽
+
+![AutoDriverHeart_TensorRT_L2_78](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_78.png)
+
+```c++
+__shared__ float var;
+```
+
+想使用共享内存，就需要使用限定符`__shared__`
+
+如果使用动态共享变量，方法流程跟静态是一样的，但需要注意几个点：
+
+- 动态申请的时候需要是一维的
+- 动态申请的变量地址都是一样的
+- 使用动态共享变量速度会慢一点
+
+### 存储体冲突（bank conflict）
+
+如果发生存储体冲突，会导致程序性能严重下降
+
+我们知道，在cuda中，32个线程组成一个线程束，程序执行就是以线程束为单位去并行执行，同样的，为了高效的访问存储，shared Memory中也对应的分成了32个存储体（也就是bank），对应warp中的32个线程
+
+![AutoDriverHeart_TensorRT_L2_90](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_90.png)
+
+bank的宽度代表了存储数据的大小宽度
+
+但是bank的存储方式很特别，一行填满之后就填写下一行，或者可以理解为矩阵，一个bank就是一列，然后一行行填写，填满一行就进入下一行，如下图所示
+
+![AutoDriverHeart_TensorRT_L2_91](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_91.png)
+
+非常理想的情况就是，32个线程互不冲突的访问不同的bank，形成一一对应的关系，没有bank confli，一个Memory周期就可以完成所有的Memory读写操作
+
+![AutoDriverHeart_TensorRT_L2_92](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_92.png)
+
+最坏的情况是，32个线程一起访问一个bank，那就是bank conflict的最坏情况，需要32个Memory周期才可以完成读写操作，这种情况常见于矩阵转置的时候
+
+![AutoDriverHeart_TensorRT_L2_93](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_93.png)
+
+缓解方法由英伟达工程师提出，使用padding来缓解，在申请共享内存的时候多添加一列，但是stride的情况不变
+
+![AutoDriverHeart_TensorRT_L2_94](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_94.png)
+
+之后就会变成这样，可以让数据错开，改变布局，缓解冲突
+
+![AutoDriverHeart_TensorRT_L2_95](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_95.png)
