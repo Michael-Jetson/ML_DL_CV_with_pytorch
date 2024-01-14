@@ -5,9 +5,129 @@ CUDA建立在NVIDIA的GPU上的一个通用并行计算平台和编程模型，C
 
 ## API
 
-在使用GPU时，我们需要使用CUDA调用API，CUDA 提 供 两 层 API 接 口 ， CUDA 驱 动(driver)API和CUDA运行时(runtime)API两种API调用性能几乎无差异，课程使用操作对用户更加友好Runtime API
+在使用GPU时，我们需要使用CUDA调用API，CUDA 提 供 两 层 API 接 口 ， CUDA 驱 动(driver)API和CUDA运行时(runtime)API，两种API调用性能几乎无差异，课程使用操作对用户更加友好Runtime API
 
-# 第一个CUDA程序
+## Driver API
+
+Driver API是早期cuda与GPU沟通的一种接口，后面发现其太过底层，细节太过复杂，所以进行进一步封装发展为Runtime API，这才是常用的API，对DriverAPI的理解有助于理解RuntimeAPI，但是实际上我们不会使用太多DriverAPI进行开发，所以不需要特别深入
+
+Driver随着显卡驱动发布，要注意适配，要与cudatoolkit分开看，其对应于cuda.h（cudatoolkit中发布）和libcuda.so两个文件，是随着显卡驱动安装到系统中的，所以不能直接移植cuda.h等文件，否则可能无法匹配
+
+关于context，有两种方法进行管理：
+
+- 手动管理的context，cuCtxCreate（手动管理，以堆栈方式push/pop）
+- 自动管理的context，cuDevicePrimaryCtxRetain（自动管理，runtime api以此为基础）
+
+关于内存，有两大类：
+
+- CPU内存，称之为Host Memory
+  - Pageable Memory：可分页内存    
+  - Page-Locked Memory（或者Pinned Memory）：页锁定内存
+- GPU内存，称之为Device Memory     
+  - Global Memory：全局内存     
+  - Shared Memory：共享内存     
+  - 。。。以及其他多种内存
+
+## Runtime API
+
+对于runtimeAPI，与driver最大区别是懒加载（用的时候才加载），即，第一个runtime API调用时，会进行cuInit初始化，避免驱动api的初始化窘境，第一个需要context的API调用时，会进行context关联并创建context和设置当前context，调用cuDevicePrimaryCtxRetain实现绝大部分api需要context，例如查询当前显卡名称、参数、内存分配、释放等
+
+所以说，CUDA Runtime是封装了CUDA Driver的高级别更友好的API
+
+- 使用cuDevicePrimaryCtxRetain为每个设备设置context，不再手工管理context，并且不提供直接管理context的API（可Driver API管理，通常不需要）
+- 可以更友好的执行核函数，.cpp可以与.cu文件无缝对接
+- 对应cuda_runtime.h和libcudart.so
+- runtime api随cuda toolkit发布
+- 主要知识点是核函数的使用、线程束布局、内存模型、流的使用
+- 主要实现归约求和、仿射变换、矩阵乘法、模型后处理，就可以解决绝大部分问题
+
+# CUDA Driver API
+
+## cuInit：驱动初始化
+
+cuInit的意义是，初始化驱动API，如果不执行，则所有API都将返回错误，全局执行一次即可没有对应的cuDestroy，不需要释放，程序销毁自动释放
+
+初始化的流程大概如下，在`main`函数中完成
+
+```c++
+    /* 
+    cuInit(int flags), 这里的flags目前必须给0;
+        对于cuda的所有函数，必须先调用cuInit
+        否则其他API都会返回CUDA_ERROR_NOT_INITIALIZED
+        https://docs.nvidia.com/cuda/archive/11.2.0/cuda-driver-api/group__CUDA__INITIALIZE.html
+     */
+    CUresult code=cuInit(0); 
+	//CUresult 类型：用于接收一些可能的错误代码
+    if(code != CUresult::CUDA_SUCCESS){
+        const char* err_message = nullptr;
+        cuGetErrorString(code, &err_message);    
+        // 获取错误代码的字符串描述
+        // cuGetErrorName (code, &err_message);  
+        // 也可以直接获取错误代码的字符串
+        printf("Initialize failed. code = %d, message = %s\n", code, err_message);
+        return -1;
+    }
+```
+
+然后也可以获取设备的信息，比如说驱动版本、GPU型号等
+
+```c++
+    int driver_version = 0;
+    code = cuDriverGetVersion(&driver_version);  // 获取驱动版本
+    printf("CUDA Driver version is %d\n", driver_version); 
+	// 若driver_version为11020指的是11.2
+
+    // 测试获取当前设备信息
+    char device_name[100]; // char 数组
+    CUdevice device = 0;
+    code = cuDeviceGetName(device_name, sizeof(device_name), device);  
+	// 获取设备名称、型号如：Tesla V100-SXM2-32GB 
+	// 数组名device_name当作指针
+    printf("Device %d name is %s\n", device, device_name);
+```
+
+## 返回值检查
+
+正确友好的检查cuda函数的返回值，有利于程序的组织结构使得代码可读性更好，错误更容易发现，就像上面的代码，我们可以根据返回值内容来判断是否成功，如果不成功的话是什么问题
+
+当然，直接在程序中编写一大堆话是很麻烦且不美观的，调试起来也不够模块化，所以我们可以考虑封装为一个检查函数
+
+```c++
+#define checkDriver(op)  __check_cuda_driver((op), #op, __FILE__, __LINE__)
+
+bool __check_cuda_driver(CUresult code, const char* op, const char* file, int line){
+
+    if(code != CUresult::CUDA_SUCCESS){    
+        const char* err_name = nullptr;    
+        const char* err_message = nullptr;  
+        cuGetErrorName(code, &err_name);    
+        cuGetErrorString(code, &err_message);   
+        printf("%s:%d  %s failed. \n  code = %s, message = %s\n", file, line, op, err_name, err_message);   
+        return false;
+    }
+    return true;
+}
+```
+
+这样子可以将返回值传入其中进行检查，从而实现了更好的程序设计
+
+## 上下文管理
+
+- context是一种上下文，类似于GPU上的进程，关联对GPU的所有操作，只是为了方便控制device的一种手段而提出来的
+- context与一块显卡关联，一个显卡可以被多个context关联，但他们之间是相互间隔的。每个Context有自己的地址空间，在一个Context中有效的东西（例如某个指针，指向一段显存；或者某个纹理对象），只能在这一个Context中使用。
+- 每个线程都有一个栈结构储存context，栈顶是当前使用的context，对应有push、pop函数操作context的栈，所有api都以当前context为操作目标，栈的存在是为了方便控制多个设备
+- 试想一下，如果执行任何操作你都需要传递一个device决定送到哪个设备执行，得多麻烦，如果使用了context，一开始就创建一个context并且与device进行关联，同时push到栈中，然后进行空间开辟和释放等操作的时候直接传入context指针，就可以自动完成一系列的操作，用完之后也可以pop掉，可以减少大量的手动指定
+- 由于高频操作，是一个线程基本固定访问一个显卡不变，且只使用一个context，很少会用到多context
+- CreateContext、PushCurrent、PopCurrent这种多context管理就显得麻烦，还得再简单
+- 因此推出了cuDevicePrimaryCtxRetain，为设备关联主context，分配、释放、设置、栈都不用你管，并且RuntimeAPI会自动使用此函数
+- primaryContext：给我设备id，给你context并设置好，此时一个显卡对应一个primary context
+- 不同线程，只要设备id一样，primary context就一样。context是线程安全的。并且代码会进一步简化
+
+## 内存分配
+
+实际上DriverAPI进行内存分配和销毁的过程是很复杂的，所以后面主要是使用RuntimeAPI进行内存分配
+
+# 第一个CUDA程序-基于Runtime API
 
 我们在目录下新建一个文件，命名为hello.cu，cu表示这是一个CUDA程序
 
@@ -71,8 +191,6 @@ __global__ void kerner_function(arguments arg)
 void __global__ kernel_function(argument arg)
 ```
 
-
-
 - 核函数只能访问GPU内存（或者说显存），目前CPU和GPU都有自己独立的内存，相互内存的访问是通过PCIE总线完成的，无法直接访问，需要使用运行时API进行内存访问
 - 核函数不能使用变长参数，只能使用定长参数
 - 核函数不能使用静态变量，不能使用函数指针，具有异步性
@@ -125,7 +243,7 @@ gpu不是单独的在计算机中完成任务，而是通过协助cpu和整个�
 
 thread是基本执行单元，在同一个block和grid中的thread会执行相同的核函数
 
-![AutoDriverHeart_TensorRT_L2_7](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_7.png)
+![AutoDriverHeart_TensorRT_L2_7](./assets/AutoDriverHeart_TensorRT_L2_7.png)
 
 总的来说，grid是一组被一起启动的CUDA核心的集合，用于定义整个GPU上的 并行作业，grid中的block是一个小工作单元，包括了一组可写作的thread，提供了一种小范围内的数据共享和协作模式，每个block可以在GPU的一个多处理器上执行，grid和block都可以是一维、二维或者三维的，便于灵活组织数据
 
@@ -147,7 +265,7 @@ thread是基本执行单元，在同一个block和grid中的thread会执行相�
 
 比如说`kernel_fun<<<2,4>>>()`，在内存中就会下图这个情况
 
-![CUDA_1](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_1.png)
+![CUDA_1](./assets/CUDA_1.png)
 
 然后我们就可以在特定的线程中输出特定的信息，比如说输出线程本身的标识
 
@@ -179,7 +297,7 @@ int main(void)
 
 CUDA最多可以组织三维的网格和线程块，blockIdx和threadIdx是类型为uint3的变量，该类型是一个结构体，具有x,y,z三个成员（3个成员都为无符号类型的成员构成）
 
-![CUDA_2](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_2.png)
+![CUDA_2](./assets/CUDA_2.png)
 
 并且gridDim和blockDim未指定的维度默认为1
 
@@ -210,11 +328,11 @@ tid就是每个线程块中线程的索引，bid是一个网格中线程块的�
 
 对三维的情况有
 
-![CUDA_3](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_3.png)
+![CUDA_3](./assets/CUDA_3.png)
 
 并且注意一下数量有限制
 
-![CUDA_4](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_4.png)
+![CUDA_4](./assets/CUDA_4.png)
 
 ## 组织线程模型
 
@@ -226,11 +344,11 @@ tid就是每个线程块中线程的索引，bid是一个网格中线程块的�
 
 这个是对应矩阵的一种情况
 
-![CUDA_9](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_9.png)
+![CUDA_9](./assets/CUDA_9.png)
 
 图中不同颜色的方块代表不同的线程块，这样子我们就将一个矩阵分解为了若干块，接下来我们就研究如何对应上去
 
-![CUDA_10](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_10.png)
+![CUDA_10](./assets/CUDA_10.png)
 
 两个方向上的索引计算公式如图
 
@@ -238,7 +356,7 @@ tid就是每个线程块中线程的索引，bid是一个网格中线程块的�
 
 如下
 
-![CUDA_11](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_11.png)
+![CUDA_11](./assets/CUDA_11.png)
 
 ## block和thread的索引与遍历
 
@@ -258,11 +376,11 @@ kernel<<<gridDim, blockDim>>>(...); // 启动核心
 
 如果不指定 `dim3` 的某个维度，该维度的默认值为 1。例如，`dim3 dim(16)` 相当于 `dim3 dim(16, 1, 1)`。
 
-![AutoDriverHeart_TensorRT_L2_9](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_9.png)
+![AutoDriverHeart_TensorRT_L2_9](./assets/AutoDriverHeart_TensorRT_L2_9.png)
 
 可以进行遍历，每个thread和block都有一个索引值，也就是threadIdx和blockIdx
 
-![AutoDriverHeart_TensorRT_L2_10](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_10.png)
+![AutoDriverHeart_TensorRT_L2_10](./assets/AutoDriverHeart_TensorRT_L2_10.png)
 
 核函数一定要加`__global__`来表明其为一个核函数，这里有个遍历用的核函数
 
@@ -276,13 +394,13 @@ __global__ void print_idx_kernel(){
 
 不过需要注意一下遍历顺序，是先遍历z，后y，最后x，或者说，z是最高的最外层的维度，x是最低的最内层的维度，就好比说你是某市z学校的y班的x学生
 
-![AutoDriverHeart_TensorRT_L2_11](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_11.png)
+![AutoDriverHeart_TensorRT_L2_11](./assets/AutoDriverHeart_TensorRT_L2_11.png)
 
 然后索引的求法如下
 
 求block在网格中的索引blockId，求thread在线程块中的索引threadId，还有线程在所有线程中的索引id
 
-![CUDA_5](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_5.png)
+![CUDA_5](./assets/CUDA_5.png)
 
 # 程序兼容性问题
 
@@ -292,7 +410,7 @@ __global__ void print_idx_kernel(){
 
 主版本号相同，次版本号不同的GPU，配置差异不大，仅仅在性能和功能上略有差异
 
-![CUDA_6](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_6.png)
+![CUDA_6](./assets/CUDA_6.png)
 
 ## 指定虚拟架构计算能力
 
@@ -387,7 +505,7 @@ nvcc编译指令指定所保留的PTX代码虚拟架构：
 
 一致的原因，举个例子，比较新的安培（Ampere）架构版本号是8，我的电脑是帕斯卡（Pascal）架构版本号是6，我的电脑直接编译是不能在安培架构上运行的，设置即时编译，就可以在生成的可执行文件中嵌入PTX代码，在安培架构上运行时，就可以直接在安培架构上运行PTX代码，但是有可能无法充分利用安培架构性能
 
-![CUDA_7](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_7.png)
+![CUDA_7](./assets/CUDA_7.png)
 
 ## nvcc编译默认计算能力
 
@@ -406,7 +524,7 @@ nvcc编译指令指定所保留的PTX代码虚拟架构：
 
 这里需要在两端进行内存空间的分配，这一操作是在host上执行的，还有配置核函数参数、数据传输等，总的来说GPU只需要启动核函数进行计算
 
-![AutoDriverHeart_TensorRT_L2_26](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_26.png)
+![AutoDriverHeart_TensorRT_L2_26](./assets/AutoDriverHeart_TensorRT_L2_26.png)
 
 程序端可以调用三种层级的CUDA API，但是基本上只调用相对顶层的API（除去Driver这个很底层的）
 
@@ -424,7 +542,7 @@ nvcc编译指令指定所保留的PTX代码虚拟架构：
 
 ## 设置GPU设备
 
-![CUDA_8](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_8.png)
+![CUDA_8](./assets/CUDA_8.png)
 
 ### 获取GPU设备数量
 
@@ -526,7 +644,7 @@ cudaError_t cudaMalloc(void **devPtr, size_t size);
 
 **参数**
 
-- **devPtr**: 是一个指向分配的设备内存的指针的指针，是一个双重指针。这个指针是在调用 `cudaMalloc` 后设置的，用于在之后的 CUDA 函数调用中引用这块内存。
+- **devPtr**: 是一个指向分配的设备内存的指针的指针，是一个二级指针。这个指针是在调用 `cudaMalloc` 后设置的，用于在之后的 CUDA 函数调用中引用这块内存。
 - **size**: 需要分配的内存字节数。它指定了在设备上分配多少内存。
 
 ### 数据拷贝
@@ -611,17 +729,17 @@ cudaError_t cudaFree(void *devPtr);
 
 计算过程示意图如下，blockSize为1
 
-![AutoDriverHeart_TensorRT_L2_29](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_29.png)
+![AutoDriverHeart_TensorRT_L2_29](./assets/AutoDriverHeart_TensorRT_L2_29.png)
 
 一个FMA就是一个加法乘法混合运算
 
-![AutoDriverHeart_TensorRT_L2_30](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_30.png)
+![AutoDriverHeart_TensorRT_L2_30](./assets/AutoDriverHeart_TensorRT_L2_30.png)
 
-![AutoDriverHeart_TensorRT_L2_32](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_32.png)
+![AutoDriverHeart_TensorRT_L2_32](./assets/AutoDriverHeart_TensorRT_L2_32.png)
 
 我们可以基于Grid和Block的逻辑进行切分计算，这样可以大大加快计算的效率
 
-![AutoDriverHeart_TensorRT_L2_34](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_34.png)
+![AutoDriverHeart_TensorRT_L2_34](./assets/AutoDriverHeart_TensorRT_L2_34.png)
 
 CUDA中有个规定，就是一个block中可以分配的thread的数量最大是1,024个线程。如果大于1,024会显示配置错误
 
@@ -1078,7 +1196,7 @@ Nsight Compute 是专门针对CUDA应用程序的性能分析和调试工具。�
 
 流多处理器包含许多硬件资源，在Fermi架构中，每个流多处理器包括32个CUDA核心，每个cuda核心都有一个全流水线的整型算数逻辑单元ALU和一个浮点算数逻辑单元FPU
 
-![CUDA_12](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_12.png)
+![CUDA_12](./assets/CUDA_12.png)
 
 流多处理器的第二个内容是共享内存和L1缓存，这两者的内存大小是可以通过运行时API进行配置的，我们可以查看GPU信息确定显卡共享内存的大小，并且共享内存是整个线程块都可以共享的，但是线程块之间是不可以相互访问的
 
@@ -1090,7 +1208,7 @@ Nsight Compute 是专门针对CUDA应用程序的性能分析和调试工具。�
 
 第六个是调度单元，每个SM有两个线程束调度器和两个指令调度单元，当一个线程块被指定给一个SM时，线程块内的所有线程将会被分成线程束，两个线程束调度器选择其中两个线程束，再用指令调度器存储两个线程束要执行的指令
 
-![CUDA_13](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_13.png)
+![CUDA_13](./assets/CUDA_13.png)
 
 这里记得区分一下并行和并发的区别，并行是真正的多线程并行，并发实际上还是单线程，只不过快速切换来执行不同的任务，GPU中的每个SM可以支持数百个线程并发执行，并且以线程块为单位向SM分配，多个线程块可以被同时分配到一个可用的SM上，一个线程块被分配好SM后就不可能分配到其他SM上了
 
@@ -1102,13 +1220,13 @@ Nsight Compute 是专门针对CUDA应用程序的性能分析和调试工具。�
 
 线程模型是以线程块为单元在SM上分配执行的
 
-![CUDA_14](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_14.png)
+![CUDA_14](./assets/CUDA_14.png)
 
 那么什么是线程束（warp）呢？一个warp是一组同时执行的线程。在大多数NVIDIA GPU中，一个warp包含32个线程，大小是固定的（通常是32个线程），并且不受线程块大小或其他因素的影响。一般一个线程块中的相邻的32个线程属于同一个线程束，表情一个线程束不能包括多个线程块中的线程
 
 但是硬件资源是有限的，同一时刻，SM只能执行一个线程束，或者说，同一时刻，真正意义上并行执行的只有这个线程束内的32个线程
 
-![CUDA_15](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_15.png)
+![CUDA_15](./assets/CUDA_15.png)
 
 ## 内存模型
 
@@ -1116,7 +1234,7 @@ CUDA内存是很重要的，处理好了可以带来很大的性能提高，CUDA
 
 GPU在执行计算任务时，需要反复从内存中读取和加载数据，访问内存是很耗时的，也是影响GPU性能的一个重要因素，所以在进行计算任务的时候，要尽可能选择低延迟高带宽的内存，有利于提高计算性能，但是实际上这种的内存造价高且难以做大，所以CPU和GPU都设计了多层的内存结构
 
-![CUDA_16](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_16.png)
+![CUDA_16](./assets/CUDA_16.png)
 
 局部性原则
 
@@ -1127,7 +1245,7 @@ GPU在执行计算任务时，需要反复从内存中读取和加载数据，�
 
 CUDA编程模型向开发者提供了更多控制权，来显式地控制内存模型的行为
 
-![CUDA_17](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_17.png)
+![CUDA_17](./assets/CUDA_17.png)
 
 每种内存都有相应的作用域、生命周期、访问权限和物理存储位置
 
@@ -1141,13 +1259,46 @@ CUDA编程模型向开发者提供了更多控制权，来显式地控制内存�
 - 全局内存：可以被所有的线程读取和修改，是GPU中最大的内存
 - 共享内存：在线程块内共享，此线程块内所有的线程都可以访问和进行读写，并且与其他线程进行数据交互，并且共享内存是片上内存，离处理器比较近，延迟低、带宽大、具有高速缓存的特性，需要频繁访问的数据可以保存至此，以提供程序效率
 
-![CUDA_18](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_18.png)
+![CUDA_18](./assets/CUDA_18.png)
+
+### CPU内存
+
+对于整个Host Memory内存条而言，操作系统区分为两个大类（逻辑区分，物理上是同一个东西）：
+
+- Pageable memory，可分页内存
+- Page lock memory，页锁定内存
+
+你可以理解为Page lock memory是vip房间，锁定给你一个人用。而Pageable memory是普通房间，在酒店房间不够的时候，选择性的把你的房间腾出来给其他人交换用，这就可以容纳更多人了。造成房间很多的假象，代价是性能降低
+
+基于前面的理解，我们总结如下：
+
+- pinned memory具有锁定特性，是稳定不会被交换的（这很重要，相当于每次去这个房间都一定能找到你）
+- pageable memory没有锁定特性，对于第三方设备（比如GPU），去访问时，因为无法感知内存是否被交换，可能得不到正确的数据（每次去房间找，说不准你的房间被人交换了）
+- pageable memory的性能比pinned memory差，很可能降低你程序的优先级然后把内存交换给别人用
+- pageable memory策略能使用内存假象，实际8GB但是可以使用15GB，提高程序运行数量（不是速度）
+- pinned memory太多，会导致操作系统整体性能降低（程序运行数量减少），8GB就只能用8GB。注意不是你的应用程序性能降低，这一点一般都是废话，不用当回事
+- GPU可以直接访问pinned memory而不能访问pageable memory（因为第二条），所以想访问pageable Memory的数据就需要先将其复制到Pinned Memory再传到GPU
+
+### 内存与GPU的数据交互
+
+GPU可以直接访问pinned memory，称之为（DMA，Direct Memory Access）
+
+对于GPU访问而言，距离计算单元越近，效率越高，所以PinnedMemory<GlobalMemory<SharedMemory
+
+代码中，由new、malloc分配的，是pageable memory，由`cudaMallocHost`分配的是PinnedMemory，由`cudaMalloc`分配的是GlobalMemory
+
+尽量多用PinnedMemory储存host数据，或者显式处理Host到Device时，用PinnedMemory做缓存，都是提高性能的关键
+
+**总结**
+
+- **Pinned Memory**：适合高频率的、大数据量的 CPU-GPU 数据传输，可以显著提高传输效率，但应谨慎使用以避免资源耗尽。
+- **Host Memory**：适合普通应用和少量数据传输，易于管理，但传输效率不如 pinned memory。
 
 ## 寄存器和局部内存
 
 寄存器是片内存储器，速度更快，并为线程独有，带宽大，局部内存就，性质如下
 
-![CUDA_19](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_19.png)
+![CUDA_19](./assets/CUDA_19.png)
 
 共享内存在核函数内是可以定义的，使用限定符shield修饰的变量，就会保存在共享内存中的，不加限定符的变量和内建变量都是保存在寄存器中的
 
@@ -1155,11 +1306,11 @@ CUDA编程模型向开发者提供了更多控制权，来显式地控制内存�
 
 寄存器的参数和性质如下
 
-![CUDA_20](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_20.png)
+![CUDA_20](./assets/CUDA_20.png)
 
 共享内存是寄存器的扩展，会存放寄存器放不下的数据，具体情况如下图所示
 
-![CUDA_21](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/CUDA_21.png)
+![CUDA_21](./assets/CUDA_21.png)
 
 当然本地内存也有各种限制
 
@@ -1189,11 +1340,11 @@ CUDA编程模型向开发者提供了更多控制权，来显式地控制内存�
 
 当两个矩阵相乘，结果矩阵中的一行元素，会在计算的时候重复加载A矩阵的一行元素，这就很不效率，我们在想能不能读取一次然后反复使用，同样的，在计算结果矩阵的某一列的时候，也会重复读取B矩阵的一列，这对于存放在全局内存中的数据来说，读取是很慢的，会限制程序的性能
 
-![AutoDriverHeart_TensorRT_L2_70](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_70.png)
+![AutoDriverHeart_TensorRT_L2_70](./assets/AutoDriverHeart_TensorRT_L2_70.png)
 
 我们就可以将这种数据，放在里计算单元更近的共享内存中
 
-![AutoDriverHeart_TensorRT_L2_77](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_77.png)
+![AutoDriverHeart_TensorRT_L2_77](./assets/AutoDriverHeart_TensorRT_L2_77.png)
 
 上图左边是安培架构的GPU，右边是SM
 
@@ -1205,7 +1356,7 @@ CUDA编程模型向开发者提供了更多控制权，来显式地控制内存�
 
 当然，不同架构的带宽不一样，甚至新架构的全局内存的带宽都可以高于老架构的L1 Cache带宽
 
-![AutoDriverHeart_TensorRT_L2_78](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_78.png)
+![AutoDriverHeart_TensorRT_L2_78](./assets/AutoDriverHeart_TensorRT_L2_78.png)
 
 ```c++
 __shared__ float var;
@@ -1225,26 +1376,26 @@ __shared__ float var;
 
 我们知道，在cuda中，32个线程组成一个线程束，程序执行就是以线程束为单位去并行执行，同样的，为了高效的访问存储，shared Memory中也对应的分成了32个存储体（也就是bank），对应warp中的32个线程
 
-![AutoDriverHeart_TensorRT_L2_90](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_90.png)
+![AutoDriverHeart_TensorRT_L2_90](./assets/AutoDriverHeart_TensorRT_L2_90.png)
 
 bank的宽度代表了存储数据的大小宽度
 
 但是bank的存储方式很特别，一行填满之后就填写下一行，或者可以理解为矩阵，一个bank就是一列，然后一行行填写，填满一行就进入下一行，如下图所示
 
-![AutoDriverHeart_TensorRT_L2_91](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_91.png)
+![AutoDriverHeart_TensorRT_L2_91](./assets/AutoDriverHeart_TensorRT_L2_91.png)
 
 非常理想的情况就是，32个线程互不冲突的访问不同的bank，形成一一对应的关系，没有bank confli，一个Memory周期就可以完成所有的Memory读写操作
 
-![AutoDriverHeart_TensorRT_L2_92](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_92.png)
+![AutoDriverHeart_TensorRT_L2_92](./assets/AutoDriverHeart_TensorRT_L2_92.png)
 
 最坏的情况是，32个线程一起访问一个bank，那就是bank conflict的最坏情况，需要32个Memory周期才可以完成读写操作，这种情况常见于矩阵转置的时候
 
-![AutoDriverHeart_TensorRT_L2_93](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_93.png)
+![AutoDriverHeart_TensorRT_L2_93](./assets/AutoDriverHeart_TensorRT_L2_93.png)
 
 缓解方法由英伟达工程师提出，使用padding来缓解，在申请共享内存的时候多添加一列，但是stride的情况不变
 
-![AutoDriverHeart_TensorRT_L2_94](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_94.png)
+![AutoDriverHeart_TensorRT_L2_94](./assets/AutoDriverHeart_TensorRT_L2_94.png)
 
 之后就会变成这样，可以让数据错开，改变布局，缓解冲突
 
-![AutoDriverHeart_TensorRT_L2_95](/home/pengfei/文档/ML_DL_CV_with_pytorch/Tools/assets/AutoDriverHeart_TensorRT_L2_95.png)
+![AutoDriverHeart_TensorRT_L2_95](./assets/AutoDriverHeart_TensorRT_L2_95.png)

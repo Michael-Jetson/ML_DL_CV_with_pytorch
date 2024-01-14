@@ -10,11 +10,11 @@
 ├── CUDA
 ├── ComputerGraphic
 ├── ComputerVision
+├── BEV
+├── MultiModal
 ├── git_img
-├── Java
+├── Tools
 ├── img_cls
-├── Jupyter
-├── obsidian
 ├── pytorch_image_classification
 ├── GAMES101Notes
 └── scripts
@@ -24,10 +24,11 @@
 - CUDA：CUDA并行计算笔记
 - ComputerGraph：计算机图形学笔记，主要是参考Games101，未更完
 - ComputerVision：一个很综合的深度学习与计算机视觉笔记，主体是学习EECS498并且大佬开源笔记上进行修改的，主要参考密歇根大学EECS498（CS231N课程的扩充版）
+- BEV：更新自动驾驶BEV感知方面的内容
 - MultiModel：参考CMU的MMML课程，没有更新完
 - git_img是git笔记中图片保存的位置
+- Tools：工具性软件的笔记，目前主要是更新CUDA和TensorRT的内容
 - pytorch_image_classification是一个基于pytorch的图像分类数据集
-- scripts是随意编写的Python脚本
 - img_cls是一个使用不同网络进行图像分类的简单项目，个人感觉这是一个很标准的小项目
 - GAMES101Notes是UCSB闫令琪主讲的现代计算机图形学入门课程的笔记
 

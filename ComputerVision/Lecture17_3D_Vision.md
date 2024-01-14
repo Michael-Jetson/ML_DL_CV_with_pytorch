@@ -659,13 +659,13 @@ $$
 
 然后我们就可以得到一个新的点，除了XY坐标，表示这个区域在整个点云中的位置，还有个向量特征F（高维度的特征空间），代表小区域的几何特征
 
-![56](./assets//PointCloudDL_TechBeatTalk_CharlesQi_72.jpg)
+![56](./assets/PointCloudDL_TechBeatTalk_CharlesQi_72.jpg)
 
 这个方法可以称为点集的简化，或者可以理解为一个层，包括了小区域的选取、采样、PointNet处理等操作
 
 我们不断重复这种操作，就可以不断进行特征的提取，点的数量越来越少，但是所代表的区域越来越大，与卷积神经网络的情况很接近
 
-![62](./assets/62-1685091996543-39.jpg)
+![62](./assets/PointCloudDL_TechBeatTalk_CharlesQi_78.jpg)
 
 最后，我们将原来的点通过某些方法（比如说插值或者转置卷积），传回到原来的位置上，实现语义分割
 
@@ -681,11 +681,11 @@ $$
 
 但是，这里有一个问题，就是这么选择每个小区域的大小，在二维网络中我们知道，大家都会选择非常小的感受野大小，比如说3x3，但是这在点云中不可能，场景的问题是采样率的不均匀（比如说远处的点更为稀疏，近处的点更为密集），最极端的情况下只有个别点，这种情况下，如果感受野太小会受到采样率不均匀问题的影响
 
-![64](./assets/64-1685092750969-41.jpg)
+![64](./assets/PointCloudDL_TechBeatTalk_CharlesQi_80.jpg)
 
 如果我们量化地研究这个问题，我们在不同点云数量的情况下分析
 
-![65](./assets/65.jpg)
+![65](./assets/PointCloudDL_TechBeatTalk_CharlesQi_81.jpg)
 
 在刚开始1024个点的时候PointNet++比较强大，得到更高的精确度，随着点云密度的下降，其性能受到了极大的影响（由于核太小，采样率不均匀的影响很大），在小于500个点以后性能低于PointNet
 
@@ -697,7 +697,7 @@ $$
 
 我们面对采样率不均匀问题，可以使用这种方法去解决：每个点周围的多个不同尺度的邻域内分别进行特征提取（综合不同大小的区域的特征，在密集的地方相信这个特征，在稀疏的地方不相信这个区域并且查看更大区域的特征），然后将这些特征进行组合，形成一个多尺度的特征表示，这类似于GoogleLeNet中的Inception结构，不过这里增加了一个Dropout，来随机丢弃输入，来迫使网络去学习如何应对缺失数据和不同尺度的数据
 
-![66](./assets/66-1685094591906-44.jpg)
+![66](./assets/PointCloudDL_TechBeatTalk_CharlesQi_82.jpg)
 
 当然还有一个MRG（Multi-res Grouping）方法，这种方法的好处就是可以节省一些计算
 
@@ -705,17 +705,17 @@ $$
 
 可以看到，增加了这种结构之后，面对数据丢失，网络变的更加鲁棒，哪怕丢失75%的数据，精度也不会下降多少
 
-![67](./assets/67-1685094912752-46.jpg)
+![67](./assets/PointCloudDL_TechBeatTalk_CharlesQi_83.jpg)
 
 同时，在很多数据集上，PointNet++的精度也有所提高
 
-![68](./assets/68-1685095390131-48.jpg)
+![68](./assets/PointCloudDL_TechBeatTalk_CharlesQi_84.jpg)
 
-![69](./assets/69-1685095399259-50.jpg)
+![69](./assets/PointCloudDL_TechBeatTalk_CharlesQi_85.jpg)
 
 同时，PointNet++还可以拓展到非欧式空间上（或者说任意的测度空间），只需要有一个定义好的距离函数，我们将其用在一个可变形物体数据集上，比如说图中的ab两个物体，看起来很像但是不是同一个类别，ac两个物体看起来差异很大但是属于同一个类别
 
-![70](./assets/70.jpg)
+![70](./assets/PointCloudDL_TechBeatTalk_CharlesQi_86.jpg)
 
 这种就无法通过坐标变换来分类了，而是通过表面的学习去完成
 
@@ -727,9 +727,9 @@ $$
 
 我们输入RGB-D数据，然后我们希望使用一组边界框去标出这些物体，下图中的示例是在图像中的表达，实际上我们还会有在空间中的表达
 
-![74](./assets/74-1685097548607-55.jpg)
+![74](./assets/PointCloudDL_TechBeatTalk_CharlesQi_90.jpg)
 
-![75](./assets/75.jpg)
+![75](./assets/PointCloudDL_TechBeatTalk_CharlesQi_91.jpg)
 
 ### 思路
 
@@ -737,15 +737,15 @@ $$
 
 实际上，之前的工作也是这样的，第一种思路就是先在三维空间中筛选出候选区域，然后将其投影到二维图像上进行分类，然后将二维特征结合到三维特征上，但是这样有问题的，三维点云空间很大，计算量也会很大，同时因为点云的特性，也无法发现一些小物体
 
-![76](./assets/76-1685098176661-58.jpg)
+![76](./assets/PointCloudDL_TechBeatTalk_CharlesQi_92.jpg)
 
 第二种工作就是基于图片的，这种方法依赖于对物体大小的先验知识，也无法精确估计物体深度和大小
 
-![76](./assets/76-1685098284378-60.jpg)
+![93](./assets/PointCloudDL_TechBeatTalk_CharlesQi_93.jpg)
 
 然后，祁芮中台的思路是结合2D和3D的优点，我们先在二维图片上使用检测算法得到一个区域，如下图中我们检测出的车辆（红色框中），然后根据这个区域去生成一个**三维视锥（3D Frustum）**，即下图中红色四棱锥，然后我们就可以在这个视锥中搜索，或者在点云中搜索
 
-![78](./assets/78-1685098759345-62.jpg)
+![78](./assets/PointCloudDL_TechBeatTalk_CharlesQi_94.jpg)
 
 这种方法大大减小了搜索的计算量和复杂度，同时在视锥内，我们可以直接在点云上做操作，我们可以利用点云几何的精确性或者PointNet等去直接分析和处理点云数据，得到非常精确的三维边界框
 
@@ -757,21 +757,21 @@ $$
 
 第一个就是有遮挡的情况，如下图所示，这个房子前面的人的一部分被遮挡了，我们根据二维区域去在视锥中进行搜索的时候，我们以上帝视角可以发现，这里的点云分布在非常大的尺度上，而这个人所对应的区域是非常小的一块点云，会有非常多的前景遮挡和干扰点，很难使用三维CNN方法等去处理
 
-![80](./assets/80-1685100134208-64.jpg)
+![80](./assets/PointCloudDL_TechBeatTalk_CharlesQi_96.jpg)
 
 这里我们使用PointNet去处理
 
-![84](./assets/84-1685101621794-66.jpg)
+![84](./assets/PointCloudDL_TechBeatTalk_CharlesQi_100.jpg)
 
 我们先在二维图像中找到这个区域，生成视锥，然后在视锥内搜索，找到后使用网络进行分割，检测出关键点，分割除去前景点和背景点，然后运行另一个网络进行姿态估计和标出边界框
 
 这种方法的效果在KITTI数据集上很长时间排名第一
 
-![85](./assets/85-1685171547419-1.jpg)
+![85](./assets/PointCloudDL_TechBeatTalk_CharlesQi_101.jpg)
 
 在一些小的物体上，比如说行人和自行车，这种方法的效果要优于其他算法
 
-![86](./assets/86-1685172774532-3.jpg)
+![86](./assets/PointCloudDL_TechBeatTalk_CharlesQi_102.jpg)
 
 这是因为二维图像的分辨率是很高的，可以很容易的筛选出来这些目标
 
@@ -781,49 +781,49 @@ $$
 
 第一个是这种方法选择了三维的表示，相比于二维，有更好的分割效果，我们可以在二维上分割出一个掩码，然后将其投射到三维中
 
-![90](./assets/90.jpg)
+![90](./assets/PointCloudDL_TechBeatTalk_CharlesQi_106.jpg)
 
 第二个就是可以进行输入归一化操作，简化学习问题
 
 比如说我们有一个车处于视锥范围内，但是其不在中心位置，我们也只能看到一部分的侧面，同时因为视锥范围很大，X坐标的变化也很大，如下图所示
 
-![92](./assets/92-1685173079666-6.jpg)
+![92](./assets/PointCloudDL_TechBeatTalk_CharlesQi_108.jpg)
 
 我们可以对坐标轴进行旋转平移，视锥中心就可以指向Z轴方向（如下图b所示），这样特征点在X的分布就会简化，学习起来也会容易；同时，物体深度也有很大区别，所以我们进行一个平移，我们基于三维物体分割可以找到分割后物体的中心，这样物体的点会集中在原点附近（下图c所示），便于学习，然后我们再使用一个网络，进一步预测物体真实的中心（下图d所示）
 
-![96](./assets/96-1685174206448-8.jpg)
+![96](./assets/PointCloudDL_TechBeatTalk_CharlesQi_112.jpg)
 
 经过这一系列的操作，可以看到精度快速提高，而且这些操作只需要通过矩阵乘法实现
 
-![97](./assets/97-1685174385114-10.jpg)
+![97](./assets/PointCloudDL_TechBeatTalk_CharlesQi_113.jpg)
 
 ### 效果展示
 
 室外，可以精准分割，哪怕两个物体很近
 
-![99](./assets/99-1685174473010-12.jpg)
+![99](./assets/PointCloudDL_TechBeatTalk_CharlesQi_115.jpg)
 
 室内
 
-![102](./assets/102.jpg)
+![102](./assets/PointCloudDL_TechBeatTalk_CharlesQi_118.jpg)
 
 ### 其他应用
 
 AI辅助外形设计（工业4.0）
 
-![106](./assets/106.jpg)
+![106](./assets/PointCloudDL_TechBeatTalk_CharlesQi_145.jpg)
 
 机器人的应用
 
-![107](./assets/107.jpg)
+![107](./assets/PointCloudDL_TechBeatTalk_CharlesQi_146.jpg)
 
 蛋白质结构预测功能
 
-![108](./assets/108.jpg)
+![108](./assets/PointCloudDL_TechBeatTalk_CharlesQi_147.jpg)
 
 甚至用在更一般化的地方，比如说分析图片关系
 
-![109](./assets/109.jpg)
+![109](./assets/PointCloudDL_TechBeatTalk_CharlesQi_148.jpg)
 
 ### 点云目标检测框架
 
