@@ -71,8 +71,10 @@
 
   
 
+   $f(x)=x^2,x=e^t,t=cos \alpha,\frac{d f}{d x}=2x,\frac{df}{dt}=\frac{df}{dx}\frac{dx}{dt}\frac{dt}{d\alpha}$
 
-​    
+$已知t=1，想求\frac{df}{dt},计算得到t=cos1,x=e^{cos1},f(x)=e^{2cos1}$
+
 ```py
     # 设置输入值
     x = -2; y = 5; z = -4
@@ -315,6 +317,137 @@ $$
 ![93](./assets/6-105.jpg)
 
 矩阵乘法例子下的隐式雅克比矩阵计算，计算稀疏矩阵的有效方法
+
+## PyTorch实战：自定义函数的自动求导
+
+### 为什么要自定义函数
+
+实际上，求导操作是PyTorch中是自动完成的，也就是我们只需要完成正确的函数嵌套或者网络嵌套，就可以进行正确的自动求导操作，不需要我们我们去实现大量复杂的求导计算
+
+虽然pytorch可以自动求导，但是有时候一些操作是不可导的，这时候你需要自定义求导方式。也就是所谓的 **Extending torch.autograd**
+
+这种情况下，我们就可以根据PyTorch已有的功能，去自己定义一个新的模块，实现更好的功能，比如说你自己设计了一个损失函数，可以实现更好的学习等等
+
+数学上，我们需要知道一个函数是怎么定义的，然后去研究它是怎么求导的，在代码中也类似，我们需要定义函数的计算过程和求导过程
+
+### 自动梯度的使用
+
+在我们计算关于张量的梯度之前，需要一个地方来存储梯度。 重要的是，我们不会在每次对一个参数求导时都分配新的内存。 因为我们经常会成千上万次地更新相同的参数，每次都分配新的内存可能很快就会将内存耗尽。 注意，一个标量函数关于向量的梯度是向量，并且与向量具有相同的形状。
+
+所以说，我们需要指定那些参数是需要梯度的，如果我们不指定，那么这个部分就不会存储梯度，甚至可能不会运行梯度计算或者报错
+
+**注意，你想求某个变量的梯度，那么一定要在其开始计算之前指定其需要求导，否则无法求导，甚至报错**
+
+```python
+x=torch.tensor([1.0,2.0,3.0])#输入的张量
+x.requires_grad_(True)#表示这个张量需要进行求导，否则不会存储其梯度
+y=torch.dot(x,x)#进行计算
+y.backward()#从最终端开始反向传播
+x.grad#显示x的梯度
+```
+
+如果我们换一种顺序，先计算，然后指定其需要求导
+
+```python
+x=torch.tensor([1.0,2.0,3.0])#输入的张量
+y=torch.dot(x,x)#进行计算
+x.requires_grad_(True)#表示这个张量需要进行求导，否则不会存储其梯度
+y.backward()#从最终端开始反向传播
+x.grad#显示x的梯度
+```
+
+那么就会在`y.backward()`这里出现错误，这也很好理解原因，如果不预先声明其需要求梯度，那么在计算的时候就不会保存梯度，计算完成之后梯度就会丢失从而无法计算最终梯度，如果需要反向传播，就会报错说明没有梯度信息
+
+类比一下就是，你妈妈喊你洗碗，然后去检查碗有没有洗，就可以得到碗洗干净的结果，如果没有喊你洗碗，那么你肯定不会去洗，如果妈妈去检查碗，肯定得不到洗干净的碗
+
+```python
+# 在默认情况下，PyTorch会累积梯度，我们需要清除之前的值
+x.grad.zero_()
+```
+
+当`y`不是标量时，向量`y`关于向量`x`的导数的最自然解释是一个矩阵。 对于高阶和高维的`y`和`x`，求导的结果可以是一个高阶张量。
+
+然而，虽然这些更奇特的对象确实出现在高级机器学习中（包括深度学习中）， 但当调用向量的反向计算时，我们通常会试图计算一批训练样本中每个组成部分的损失函数的导数。 这里，我们的目的不是计算微分矩阵，而是单独计算批量中每个样本的偏导数之和。
+
+```python
+# 对非标量调用backward需要传入一个gradient参数，该参数指定微分函数关于self的梯度。
+# 本例只想求偏导数的和，所以传递一个1的梯度是合适的
+x.grad.zero_()
+y = x * x
+# 等价于y.backward(torch.ones(len(x)))
+y.sum().backward()
+x.grad
+```
+
+注意，深度学习中一般对标量求导（主要是评价指标和Loss），如果损失函数是向量，那么可能导致维度越来越大
+
+### 求导原理
+
+具体代码实现中，是将代码分解为操作子，然后构成无环图，然后根据无环图进行梯度求导，就如下图所示
+
+![D2L_LiMu_L7_4](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_4.png)
+
+同时注意一下，PyTorch 中的梯度自动求导是一种数值求导，而不是符号求导，实际上不是我们随便一个给一个函数，PyTorch 就可以完成求导操作的，一个可以完成求导的函数，实际上是函数中存储了一个计算梯度的方法，我们通过这个方法去计算梯度
+
+大家可以这样理解，我们告诉计算机，函数是f(x)，求导函数g(x,f(x))，当我们要计算机自动求梯度的时候，我们给计算机一个变量x，计算机得到了输出值f(x)，然后根据求导的函数，输入两个值就得到梯度
+
+![D2L_LiMu_L7_3](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_3.png)
+
+### 自定义函数完成求导
+
+我们可以自己尝试定义一个这样的可以反向传播的函数，这样子才可以更好的去理解这个反向传播是怎么实现的
+
+我们想自己定义一个可以反向传播的函数，那么这个函数要定义成类，并且需要继承`torch.autograd.Function`类，同时分别定义`forward`和`backward`方法，这两个方法是实现正向推理和反向传播的关键，我们以一个简单的平方函数为例看看如何实现的
+
+```python
+class SquareFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        # 正向传播的逻辑
+        ctx.save_for_backward(input)  # 保存输入，以便在反向传播时使用
+        return input * input # 计算输出
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # 反向传播的逻辑
+        input, = ctx.saved_tensors  # 获取保存的输入
+        grad_input = grad_output * 2 * input  # 计算输入的梯度
+        return grad_input
+```
+
+`forward`方法就是前向推理的过程，在数学中对应$f(x)$中$f$，我们给一个自变量，就可以根据此求出因变量（也就是输出），方法有两个参数`ctx`和`input`
+
+- `ctx`是“上下文”（context），用于在正向传播和反向传播之间存储信息。这个上下文对象是特别为每次操作或函数调用创建的，可以用来保存用于计算梯度的任何信息
+
+```python
+import torch
+
+class SquareFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        # 正向传播的逻辑
+        ctx.save_for_backward(input)  # 保存输入，以便在反向传播时使用
+        return input * input
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # 反向传播的逻辑
+        input, = ctx.saved_tensors  # 获取保存的输入
+        grad_input = grad_output * 2 * input  # 计算输入的梯度
+        return grad_input
+
+# 测试自定义函数
+x = torch.tensor([2.0], requires_grad=True)
+y = SquareFunction.apply(x)
+y.backward()
+
+print(f"x: {x}")
+print(f"y: {y}")
+print(f"x的梯度: {x.grad}")
+```
+
+
+
 ## 小结
 
 * 对梯度的含义有了直观理解，知道了梯度是如何在网络中反向传播的，知道了它们是如何与网络的不同部分通信并控制其升高或者降低，并使得最终输出值更高的。

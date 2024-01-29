@@ -100,10 +100,11 @@ class AlexNet(nn.Module):
 # if确保只有单独运行该模块时，此表达式才成立，才可以进入此判断语法，执行其中的测试代码，反之不行
 if __name__ == '__main__':
     # rand：返回一个张量，包含了从区间[0, 1)的均匀分布中抽取的一组随机数，此处为四维张量
-    x = torch.rand([1, 3, 224, 224])
+    x = torch.rand([16, 3, 224, 224])
     # 模型实例化
     model = MyAlexNet()
     y = model(x)
+
 ```
 
 
