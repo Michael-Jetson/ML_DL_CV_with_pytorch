@@ -69,12 +69,6 @@
 
 现在考虑更复杂的包含多个函数的复合函数，比如![f\(x,y,z\)=\(x+y\)z][41]。虽然这个表达足够简单，可以直接微分，但是在此使用一种有助于读者直观理解反向传播的方法。将公式分成两部分：![q=x+y][42]和![f=qz][43]。在前面已经介绍过如何对这分开的两个公式进行计算，因为![f][13]是![q][44]和![z][45]相乘，所以![displaystylefrac{partial f}{partial q}=z,frac{partial f}{partial z}=q][46]，又因为![q][44]是![x][12]加![y][32]，所以![displaystylefrac{partial q}{partial x}=1,frac{partial q}{partial y}=1][47]。然而，并不需要关心中间量![q][44]的梯度，因为![frac{partial f}{partial q}][48]没有用。相反，函数![f][13]关于![x,y,z][49]的梯度才是需要关注的。**链式法则**指出将这些梯度表达式链接起来的正确方式是相乘，比如![displaystylefrac{partial f}{partial x}=frac{partial f}{partial q}frac{partial q}{partial x}][50]。在实际操作中，这只是简单地将两个梯度数值相乘，示例代码如下：
 
-  
-
-   $f(x)=x^2,x=e^t,t=cos \alpha,\frac{d f}{d x}=2x,\frac{df}{dt}=\frac{df}{dx}\frac{dx}{dt}\frac{dt}{d\alpha}$
-
-$已知t=1，想求\frac{df}{dt},计算得到t=cos1,x=e^{cos1},f(x)=e^{2cos1}$
-
 ```py
     # 设置输入值
     x = -2; y = 5; z = -4
@@ -262,7 +256,7 @@ _非直观影响及其结果_。注意一种比较特殊的情况，如果乘法
 
 关于向量的求导中维度的变化，公式如下
 
-![69](./assets/69-1682754437671-1.jpg)
+![EECS498_L6_70](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_70.jpg)
 
 得到的实际上是雅克比矩阵，这个矩阵可以描述每个输出对输入的影响
 
@@ -297,7 +291,7 @@ $$
 
 我们需要找到一种隐式的计算的方式
 
-![88](./assets/88.jpg)
+![EECS498_L6_89.](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_89.jpg)
 
 我们先从输入的一个元素开始考虑，我们假设这个元素为
 $$
@@ -309,12 +303,12 @@ $$
 $$
 其中上流梯度一支，我们只需求y对x的梯度即可
 
-![92](./assets/92.jpg)
+![EECS498_L6_93](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_93.jpg)
 
 然后我们根据矩阵乘法可知，y的第一行第一列的元素是x第一行与w第一列的乘积，对x_11求导的结果就是w_11
 
 类似的可以推广到y的所有元素，然后就可以得到y对x_11的导数以及y对x的导数
-![93](./assets/6-105.jpg)
+![93](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/6-105.jpg)
 
 矩阵乘法例子下的隐式雅克比矩阵计算，计算稀疏矩阵的有效方法
 

@@ -54,7 +54,7 @@
 
 还有一种进行图像特征提取的方式就是定向梯度直方图
 
-![10](./assets/10.jpg)
+![10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_11.jpg)
 
 这种方式可以通过一系列处理得到图像的局部梯度信息，具有很好的区分性和鲁棒性，然后，这些特征可以被用于训练分类器
 
@@ -66,7 +66,7 @@
 
 之后的步骤是构建视觉词的代码本，使用学习到的视觉词的代码本来编码你的图像，来表示每个视觉词在单个输入图像中出现了多少次
 
-![16](./assets/16.jpg)
+![16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_17.jpg)
 
 实际上，2011年的ImageNet挑战赛里面的冠军方案，就是基于这种模型；他们的方案分为两部分：特征提取器和可学习分类器
 
@@ -95,7 +95,7 @@ $$
 
 当然我们也可以使用这种图形化的形式来表示神经网络，因为其中的每个部分都相互连接，所以也被称为全连接神经网络
 
-![24](./assets/24.jpg)
+![EECS498_L5_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_25.jpg)
 
 这个激活函数的功能就是可以拓宽神经网络的拟合能力，因为如果有多个线性分类器组合，那么结果还是一个线性分类器，多个分类器等于一个分类器
 
@@ -105,15 +105,15 @@ $$
 
 面对一个线性可分的数据集，线性分类器的功能就是找到一个或者多个超平面，可以对不同的数据进行分割，但是存在某些线性不可分的数据集，这个时候，就无法使用超平面进行分割了，或者说找不到一种线性方式进行分割，比如说下面的数据集
 
-![55](./assets/55.jpg)
+![EECS498_L5_56](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_56.jpg)
 
 我们发现，找不到一个合适的变换矩阵$W$来分割这个数据集，所以就需要找到一种非线性方式来分割，也就是激活函数的方式，这样就可以完成某些无法线性分割的数据集的分割，比如说下面这种方式，就是使用ReLu函数进行特征变换，然后可以看到，BCD三个区间都并不对应新空间下的三个象限，而是分别落在坐标轴和原点上
 
-![60](./assets/60-1682664488898-3.jpg)
+![EECS498_L5_61](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_61.jpg)
 
 这样，就可以完成某些数据集的分割了，比如说下图
 
-![64](./assets/64.jpg)
+![EECS498_L5_65](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_65.jpg)
 
 # 单个神经元建模
 

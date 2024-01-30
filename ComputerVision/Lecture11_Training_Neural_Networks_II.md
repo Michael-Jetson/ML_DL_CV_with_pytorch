@@ -58,7 +58,7 @@
 
 步进式递减的方式，就是在某些节点上降低学习率，比如说ResNet这种，就是每三十轮训练就会学习率变为原来的十分之一（如图）
 
-![15](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/15-1683168605246-3.jpg)
+![15](./assets/15-1683168605246-3.jpg)
 
 可以看到，实际上每次步进后的第20-30个epoch，网络就会再次进入一个稳定状态，然后再一次进行学习率衰减，就可以重新进入一个相对快速的学习状态
 
