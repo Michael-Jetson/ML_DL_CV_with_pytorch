@@ -5,26 +5,6 @@
 
 ![CS231n课程笔记翻译：反向传播笔记][4]
 
-[杜客][6] [Source](https://zhuanlan.zhihu.com/p/21407711?refer=intelligentunit "Permalink to CS231n课程笔记翻译：反向传播笔记 - 知乎专栏")
-
-译者注：本文[智能单元][2]首发，译自斯坦福CS231n课程笔记[Backprop Note__][7]，课程教师[Andrej Karpathy__][8]授权翻译。本篇教程由[杜客][6]翻译完成，[堃堃][9]和[巩子嘉][10]进行校对修改。译文含公式和代码，建议PC端阅读。
-
-
-
-## 原文如下：
-
-内容列表：
-
-* 简介
-* 简单表达式和理解梯度
-* 复合表达式，链式法则，反向传播
-* 直观理解反向传播
-* 模块：Sigmoid例子
-* 反向传播实践：分段计算
-* 回传流中的模式
-* 用户向量化操作的梯度
-* 小结
-
 ## 简介
 
 **目标**：本节将帮助读者对**反向传播**形成直观而专业的理解。反向传播是利用**链式法则**递归计算表达式的梯度的方法。理解反向传播过程及其精妙之处，对于理解、实现、设计和调试神经网络非常**关键**。  
@@ -256,7 +236,7 @@ _非直观影响及其结果_。注意一种比较特殊的情况，如果乘法
 
 关于向量的求导中维度的变化，公式如下
 
-![EECS498_L6_70](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_70.jpg)
+![EECS498_L6_70](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_70.jpg?)
 
 得到的实际上是雅克比矩阵，这个矩阵可以描述每个输出对输入的影响
 
@@ -291,7 +271,7 @@ $$
 
 我们需要找到一种隐式的计算的方式
 
-![EECS498_L6_89.](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_89.jpg)
+![EECS498_L6_89.](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_89.jpg?)
 
 我们先从输入的一个元素开始考虑，我们假设这个元素为
 $$
@@ -303,7 +283,7 @@ $$
 $$
 其中上流梯度一支，我们只需求y对x的梯度即可
 
-![EECS498_L6_93](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_93.jpg)
+![EECS498_L6_93](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_93.jpg?)
 
 然后我们根据矩阵乘法可知，y的第一行第一列的元素是x第一行与w第一列的乘积，对x_11求导的结果就是w_11
 
@@ -379,17 +359,19 @@ x.grad
 
 具体代码实现中，是将代码分解为操作子，然后构成无环图，然后根据无环图进行梯度求导，就如下图所示
 
-![D2L_LiMu_L7_4](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_4.png)
+![D2L_LiMu_L7_4](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_4.png?)
 
 同时注意一下，PyTorch 中的梯度自动求导是一种数值求导，而不是符号求导，实际上不是我们随便一个给一个函数，PyTorch 就可以完成求导操作的，一个可以完成求导的函数，实际上是函数中存储了一个计算梯度的方法，我们通过这个方法去计算梯度
 
 大家可以这样理解，我们告诉计算机，函数是f(x)，求导函数g(x,f(x))，当我们要计算机自动求梯度的时候，我们给计算机一个变量x，计算机得到了输出值f(x)，然后根据求导的函数，输入两个值就得到梯度
 
-![D2L_LiMu_L7_3](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_3.png)
+![D2L_LiMu_L7_3](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/D2L_LiMu_L7_3.png?)
 
 ### 自定义函数完成求导
 
 我们可以自己尝试定义一个这样的可以反向传播的函数，这样子才可以更好的去理解这个反向传播是怎么实现的
+
+![EECS498_L6_61](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L6_61.jpg)
 
 我们想自己定义一个可以反向传播的函数，那么这个函数要定义成类，并且需要继承`torch.autograd.Function`类，同时分别定义`forward`和`backward`方法，这两个方法是实现正向推理和反向传播的关键，我们以一个简单的平方函数为例看看如何实现的
 

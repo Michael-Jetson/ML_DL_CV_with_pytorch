@@ -1,33 +1,6 @@
-[Source](https://zhuanlan.zhihu.com/p/21560667?refer=intelligentunit "Permalink to CS231n课程笔记翻译：神经网络笔记 2 - 知乎专栏")
-注：这篇格式可能有较大问题
-
-# CS231n课程笔记翻译：神经网络笔记 2 - 知乎专栏
-
-![CS231n课程笔记翻译：神经网络笔记 2][4]
-
-# CS231n课程笔记翻译：神经网络笔记 2
-
-![杜客][5][杜客][6]
-
-8 months ago
-
-译者注：本文[智能单元][2]首发，译自斯坦福CS231n课程笔记[Neural Nets notes 2__][7]，课程教师[Andrej Karpathy__][8]授权翻译。本篇教程由[杜客][6]翻译完成，[堃堃][9]进行校对修改。译文含公式和代码，建议PC端阅读。
-
-## 原文如下
-
-内容列表：
-
-* 设置数据和模型
-    * 数据预处理
-    * 权重初始化
-    * 批量归一化（Batch Normalization）
-    * 正则化（L2/L1/Maxnorm/Dropout）
-* 损失函数
-* 小结
-
 # 激活函数
 
-我们指导，在人工神经元中总是要有一个激活函数（非线性），这对于提高神经网络的处理能力是很有必要的，否则神经网络的所有操作都会被折叠成一个线性层上
+我们知道，在人工神经元中总是要有一个激活函数（非线性），这对于提高神经网络的处理能力是很有必要的，否则神经网络的所有操作都会被折叠成一个线性层上，实际上，人工神经元的拟合能力，主要来自于这个激活函数
 
 ## 不同激活函数集合
 
@@ -556,6 +529,7 @@ _注意_：L2损失比起较为稳定的Softmax损失来，其最优化过程要
 [82]: http://zhihu.com/equation?tex=L_i%3D%7C%7Cf-y_i%7C%7C_1%3D%5Csum_j%7Cf_j-%28y_i%29_j%7C
 [83]: http://zhihu.com/equation?tex=%5Csum_j
 [84]: http://zhihu.com/equation?tex=%5Cdelta_%7Bij%7D
+
 [85]: http://zhihu.com/equation?tex=%5Cpartial+L_i%2F%5Cpartial+f_j
 [86]: http://zhihu.com/equation?tex=sign%28%5Cdelta_%7Bij%7D%29
 [87]: http://zhihu.com/equation?tex=%5Csqrt%7B2%2Fn%7D

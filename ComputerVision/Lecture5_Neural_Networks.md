@@ -1,37 +1,3 @@
-
-[Source](https://zhuanlan.zhihu.com/p/21462488?refer=intelligentunit "Permalink to CS231n课程笔记翻译：神经网络笔记1（上） - 知乎专栏")
-
-# CS231n课程笔记翻译：神经网络笔记1（上） - 知乎专栏
-
-
-
-![CS231n课程笔记翻译：神经网络笔记1（上）][4]
-
-# CS231n课程笔记翻译：神经网络笔记1（上）
-
-![杜客][5][杜客][6]
-
-9 months ago
-
-译者注：本文[智能单元][2]首发，译自斯坦福CS231n课程笔记[Neural Nets notes 1__][7]，课程教师[Andrej Karpathy__][8]授权翻译。本篇教程由[杜客][6]翻译完成，[巩子嘉][9]和[堃堃][10]进行校对修改。译文含公式和代码，建议PC端阅读。
-
-## 原文如下
-
-内容列表：
-
-* 不用大脑做类比的快速简介
-* 单个神经元建模
-    * 生物动机和连接
-    * 作为线性分类器的单个神经元
-    * 常用的激活函数 **_译者注：上篇翻译截止处_**
-* 神经网络结构
-    * 层组织
-    * 前向传播计算例子
-    * 表达能力
-    * 设置层的数量和尺寸
-* 小节
-* 参考文献
-
 ## 特征变换
 
 我们从几何学的角度看到了这一点，记得从线性分类器的几何学角度来看，我们认为线性分类器是在画高维超平面，将这个高维的欧几里得空间分割成两块
@@ -42,7 +8,7 @@
 
 对于某些线性不可分的数据集，我们可以提出一种特征变换的方式（feature transform），将这些数据映射到特征空间去进行分类，或者说找到一种合适分类的映射方式来完成分类任务，这样就可以克服线性分类器的一些缺点；在这里我们是在特征空间中训练分类器
 
-![image-20230425220806741](./EECS498/assets/image-20230425220806741.png)
+![image-20230425220806741](./assets/image-20230425220806741.png)
 
 这就是一个将笛卡尔坐标系变换到极坐标系下的例子，这样的话，原本在笛卡尔坐标系下线性不可分的数据集，在极坐标系下线性可分了，也就是说我们可以在特征空间下构建线性分类器
 
@@ -54,7 +20,7 @@
 
 还有一种进行图像特征提取的方式就是定向梯度直方图
 
-![10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_11.jpg)
+![10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_11.jpg?raw=true)
 
 这种方式可以通过一系列处理得到图像的局部梯度信息，具有很好的区分性和鲁棒性，然后，这些特征可以被用于训练分类器
 
@@ -66,7 +32,7 @@
 
 之后的步骤是构建视觉词的代码本，使用学习到的视觉词的代码本来编码你的图像，来表示每个视觉词在单个输入图像中出现了多少次
 
-![16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_17.jpg)
+![16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_17.jpg?)
 
 实际上，2011年的ImageNet挑战赛里面的冠军方案，就是基于这种模型；他们的方案分为两部分：特征提取器和可学习分类器
 
@@ -95,7 +61,7 @@ $$
 
 当然我们也可以使用这种图形化的形式来表示神经网络，因为其中的每个部分都相互连接，所以也被称为全连接神经网络
 
-![EECS498_L5_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_25.jpg)
+![EECS498_L5_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_25.jpg?raw=)
 
 这个激活函数的功能就是可以拓宽神经网络的拟合能力，因为如果有多个线性分类器组合，那么结果还是一个线性分类器，多个分类器等于一个分类器
 
@@ -105,15 +71,15 @@ $$
 
 面对一个线性可分的数据集，线性分类器的功能就是找到一个或者多个超平面，可以对不同的数据进行分割，但是存在某些线性不可分的数据集，这个时候，就无法使用超平面进行分割了，或者说找不到一种线性方式进行分割，比如说下面的数据集
 
-![EECS498_L5_56](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_56.jpg)
+![EECS498_L5_56](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_56.jpg?raw=)
 
 我们发现，找不到一个合适的变换矩阵$W$来分割这个数据集，所以就需要找到一种非线性方式来分割，也就是激活函数的方式，这样就可以完成某些无法线性分割的数据集的分割，比如说下面这种方式，就是使用ReLu函数进行特征变换，然后可以看到，BCD三个区间都并不对应新空间下的三个象限，而是分别落在坐标轴和原点上
 
-![EECS498_L5_61](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_61.jpg)
+![EECS498_L5_61](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_61.jpg?raw=)
 
 这样，就可以完成某些数据集的分割了，比如说下图
 
-![EECS498_L5_65](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_65.jpg)
+![EECS498_L5_65](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L5_65.jpg?raw=)
 
 # 单个神经元建模
 

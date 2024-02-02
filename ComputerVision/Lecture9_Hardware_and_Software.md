@@ -1,4 +1,3 @@
-
 [Source](https://zhuanlan.zhihu.com/p/21513367?refer=intelligentunit "Permalink to CS231n课程笔记翻译：神经网络笔记1（下） - 知乎专栏")
 
 # CS231n课程笔记翻译：神经网络笔记1（下） - 知乎专栏
