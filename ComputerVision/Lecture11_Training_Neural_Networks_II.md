@@ -10,7 +10,7 @@
 
 所以我们需要找到一种非常好的学习率，使得网络既可以快速学习，也可以收敛到一个很好的状态，但是明显一个固定的学习率是无法完成这个任务的，我们需要使得学习率可以变化——先是较大的学习率，然后是更小的学习率
 
-![EECS498_L11_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_15.jpg)
+![EECS498_L11_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_15.jpg?raw=true)
 
 实际上也有很多不同的学习率的设置方法
 
@@ -18,7 +18,7 @@
 
 步进式递减的方式，就是在某些节点上降低学习率，比如说ResNet这种，就是每三十轮训练就会学习率变为原来的十分之一（如图）
 
-![EECS498_L11_16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_16.jpg)
+![EECS498_L11_16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_16.jpg?raw=true)
 
 可以看到，实际上每次步进后的第20-30个epoch，网络就会再次进入一个稳定状态，然后再一次进行学习率衰减，就可以重新进入一个相对快速的学习状态
 
@@ -28,7 +28,7 @@
 
 为了克服步进衰减的一些缺点，近年来余弦式衰减开始流行起来，使用一种余弦式函数来完成这个学习率衰减的过程
 
-![EECS498_L11_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_17.jpg)
+![EECS498_L11_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_17.jpg?raw=true)
 
 这个方式的好处就是，只有两个参数需要设置（初始学习率$\alpha_0$，训练周期T），更加方便
 
@@ -36,13 +36,13 @@
 
 这种最简单，学习率进行线性下降
 
-![EECS498_L11_18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_18.jpg)
+![EECS498_L11_18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_18.jpg?raw=true)
 
 ### 平方根倒数衰减
 
 这是2017年提出的一种方案，但是存在的缺陷是，模型实际上在最初的高学习率上花费的时间少，在后面的低学习率上花费较多时间，而其他的衰减方案往往在初始的高学习率上花费更多时间，容易导致最开始的时候模型收敛缓慢
 
-![EECS498_L11_19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_19.jpg)
+![EECS498_L11_19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_19.jpg?raw=true)
 
 ### 总结
 
