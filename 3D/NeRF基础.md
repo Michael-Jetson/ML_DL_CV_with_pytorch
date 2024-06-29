@@ -1,3 +1,67 @@
+
+
+
+&emsp;
+
+
+
+
+
+   
+
+&emsp;
+
+# 5 课程安排
+
+- 按照 "用到再写" 原则讲解，尽量不去关注还没用上的实现
+
+### （1）NeRF 基本介绍
+
+### （2）NeRF Synthetic 数据集的处理
+
+- DatasetProvider 类
+  - 解析所有图片 images
+  - 解析每张图片对应的相机位姿 $T_{wc}$
+    - $R$: 相机坐标系到世界坐标系旋转矩阵
+    - $t$: 平移向量，相机坐标系原点在世界坐标系下的表示
+  - 计算每张图片对应的相机焦距，用于将像素坐标转换成相机坐标
+  - 将 $(R, G, B, alpha)$ 转换为 $(R, G, B)$
+- NeRFDataset 类
+  - 生成每一张图片的像素坐标
+  - 生成 precrop 的坐标的索引
+  - 将像素坐标转换成 COLMAP 坐标系
+  - make_rays
+    - 将 COLMAP 坐标系转成常用 Camera 坐标系
+    - 将 Camera 坐标系转成 World 坐标系
+    - 取出位姿中的 Camera 坐标系在 World 坐标系下表示的原点
+  - 完成类的两个特性：求长度、索引
+
+### （3）NeRF 模型建模
+
+- 根据论文模型建模
+- 傅里叶特征位置编码（Positional Encoding）
+- 视图独立性与无视图独立性的实现
+
+### （4）训练
+
+- 体素渲染
+  - 光线采样
+    - 在光线上采样 $n$ 个点，计算每个点的 z 值
+    - 对每个点进行光线建模
+  - 视图采样，将坐标转换成归一化坐标系上的坐标
+  - coarse 模型
+  - 推理得出 $RGB_{coarse}$ 和权重 $W_{coarse}$
+  - 用 weigths 对光线的 z 值进行重采样并重新构建光线模型
+  - fine 模型
+  - 推理得出 $RGB_{fine}$ 和权重 $W_{fine}$
+- 模型 backward
+
+### （5）360° 渲染
+
+
+​            
+​        
+
 # 概述
 
 NeRF、Mip-NeRF和Instant-NGP三篇是NeRF论文的基础，其中Mip-NeRF是从视觉质量方面改进，Instant-NGP是从速度方面改进，甚至重新设计了NeRF架构
@@ -5,6 +69,14 @@ NeRF、Mip-NeRF和Instant-NGP三篇是NeRF论文的基础，其中Mip-NeRF是从
 # NeRF开山之作
 
 NeRF的贡献是，提出了一种可以端到端的视角合成方法，使用神经网络去学习多视角图像中的光线，然后在任意视角去看的时候就可以将其投影为图像
+
+NeRF实际上所做的事情，就是映射一个 3D 场景，或者说从一系列的图像（以及拍摄的位姿）中学习如何映射和渲染一个场景，然后给出一个新的拍摄位姿，就可以渲染出来一个新的图像
+
+- 渲染过程
+  - 给定任意一个位姿
+  - 根据这个位姿及其对应的画布上的像素坐标 $(u, v)$ 构建出和对应的射线
+  - 经过两个模型（coarse、fine）推理出 $RGB$ 和 $\sigma$，就可以渲染了
+  - 以此推广到每一帧，连续起来就成了视频，或实时 3D 渲染
 
 ## 神经辐射场
 
@@ -91,6 +163,98 @@ $$
 这样就可以学习的更为高效
 
 ![Shenlan_LuPeng_NeRF_L3_22](./assets/Shenlan_LuPeng_NeRF_L3_22.png)
+
+
+
+## NeRF代码（PyTorch重制版）
+
+### NeRF Synthetic 数据集
+
+>数据集组成
+
+- camera_angle_x: 水平视场角
+- frames: 每一帧的照片
+  - file_path: 每一帧照片
+  - rotation: 没有用到
+  - transform_matrix: 变换矩阵；$Camera$ 坐标系到 $World$ 坐标系的转换矩阵；$Camera$ 在世界坐标系下的位姿
+    - $R$: 旋转矩阵
+    - $t$: 平移向量，坐标系的中心（origin）
+
+>坐标系
+
+- 相机坐标系: [right, up, backward] 即 [x, y, z]，右方向是x正方向，上是y的正方向，后方向是z的正方向
+- COLMAP: [right, down, forward] 即 [x, -y, -z]
+
+### NeRF模型结构
+
+>NeRF 有两个模型：corse、fine，分别是粗采样和精采样
+
+- corse
+
+  - 输入: rays, view_dirs
+  - 输出: $\sigma$, $RGB_{corse}$
+- fine
+
+  - 输入: $\sigma$、$RGB_{corse}$
+  - 输出: $RGB_{fine}$
+
+![NeRF_Model](./assets/NeRF_Model.png)
+
+实际上NeRF的网络清一色为线性层和激活函数的组合
+
+
+  - 第 1 层：(60 + 3, 256)
+  - 第 2-8 层：(256, 256)，其中第 5-6 层为：256 -> 256+cat -> 256
+  - 第 9 层：(256, 256)
+    - 分支 1: (256, 1)，输出 $\sigma$
+    - 分支 2: 加入了归一化坐标系的特征，(256+cat, 128)
+  - 最后一层：(128, 3)，输出 $RGB$
+
+# 4 NeRF 的相关概念
+
+>神经辐射场（Neural Radiance Fields）
+
+- 辐射场可以把它看做是一个函数：
+  $$f: (x, y, z, \phi, \theta) \rightarrow(R, G, B, \sigma)$$
+  - 输入：
+    - $(x, y, z)$: 目标点的三维坐标
+    - $(\phi, \theta)$: 射线的方向
+  - 输出：
+    - $(R, G, B)$: 像素颜色
+    - $\sigma$: 密度，相当于是权重，用来加权求和得到最终的颜色
+
+- NeRF 就是用神经网络来构建这个映射
+
+&emsp;
+
+>体素渲染（Volume Rendering）
+
+- 射线由相机坐标系原点 $O$ 和像素的坐标 $(x, y, z)$ 连成，对这条射线上所有的点的颜色做某种运算就可以得到这个像素的颜色值：
+
+  - 连续：积分，公式见论文
+  - 离散：加权求和，公式见论文
+
+  当每个像素的颜色都计算出来，那么这个视角下的图像就被渲染出来了
+
+&emsp;
+
+>分层采样（Hierarchical volume sampling）
+
+- 然而又有一个问题，我们希望这个辐射场是连续的，但是空间是无限的，怎么计算？
+- 所以提出了分层采样
+  - 第 1 次采样
+    - 用于 coarse 模型
+    - 在一条光线上采样 $n$ 个点进行 coarse 模型训练
+    - 输出 $RGB$、$\sigma$
+  - 第 2 次采样
+    - 用于 fine 模型
+    - 利用 coarse 模型输出的 $\sigma$ 计算重采样的权重，对射线进行2次采样
+    - 输出最终的 $RGB$ 值
+
+
+
+
+
 
 # Mip-NeRF
 
