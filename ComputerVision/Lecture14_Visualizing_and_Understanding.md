@@ -19,13 +19,13 @@
 
 下面是四个不同模型，在ImageNet数据集上进行预训练之后，将第一层卷积核进行可视化
 
-![5](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/5.jpg)
+![EECS498_L14_6](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_6.png)
 
 我们可以看到，尽管不同模型的架构不同，但是第一层卷积核想寻找的特征却是很接近
 
 我们可以想一下卷积神经网络到底在卷积什么，CNN中的卷积是一种离散的矩阵乘法计算，可以理解为是连续卷积的离散化，而卷积神经网络的卷积，则是想每个卷积层都学习出一种合适的卷积核（卷积核是一个函数）
 
-![16](.\assets\16-1688220804122-3.png)
+![PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/PointCloudDL_ShenlanOpen_ConvNet-On-PointCloud_LiFuxin_16.png)
 
 如果我们想将可视化方法应用在更高层上，会有一些问题，这是因为在第一层卷积层，卷积核通常会学习到一些基本的视觉特征，如边缘和颜色。例如，一个卷积核可能会在检测到垂直边缘时产生高的激活值。我们可以通过将这些卷积核的权值可视化为图像来查看这些特征。
 
@@ -35,9 +35,9 @@
 
 随着神经元层数的加大，所寻找的特征也越来越语义化，或者说神经元的语义信息越来越明显了（如下图所示），或者可以说神经元越来越有选择性了，我们可以这样理解：高层的神经元都是一个简易的物体检测器，可以检测特定的物体是否存在
 
-![20](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/20.png)
+![20](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/20.png)
 
-![6](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/6.jpg)
+![EECS498_L14_7](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_7.jpg)
 
 但是我们仍然无法对这些卷积核在寻找什么这件事上有一种强烈的直觉，卷积核可视化这个方法也无法让我们理解更高层的卷积核在做什么，所以我们需要使用其他方法来尝试理解卷积神经网络的其他层在干什么
 
@@ -51,7 +51,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们使用训练好的AlexNet模型，在测试集的图像上进行前向推理，然后记录每个图像所生成的4096维特征向量，一旦我们收集了这类图像数据集及其特征向量，我们就可以尝试使用各种技术将它们可视化，首先我们在这些特征向量上使用最近邻算法
 
-![8](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/8-1683717093006-3.jpg)
+![EECS498_L14_9](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_9.jpg)
 
 回想我们第一次使用最近邻算法的时候，是直接使用像素进行计算的，这个时候最近邻算法倾向于包含相似像素的图像判定为一类，尽管同一个类别的图像并不是真的同一个类别
 
@@ -67,7 +67,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们使用类似的方法，我们准备了一个20万张混合了物体和场景的图像数据集，然后分别在ImageNet和places数据集上训练网络，这两个网络都没有看过这二十万张图片，然后我们将这个数据集放入两个网络，并且记录每一层每个神经元的响应，并且进行和图片的相关性分析，然后就可以估计神经元所喜欢的模式及其感受野
 
-![17](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/17.png)
+![17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/17.png)
 
 ## 降维方法可视化
 
@@ -75,7 +75,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 这里首先是主成分分析（principal component analysis，PCA）方法，这是一种线性降维方法，可以尽可能保留高维特征空间的结构，并且进行线性的降维投影
 
-![9](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/9.jpg)
+![EECS498_L14_10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_10.jpg)
 
 然后还有一种方法就是t-SNE算法（t-Distributed Stochastic Neighbor Embedding），这是一种用于数据可视化的降维技术，特别擅长处理高维数据。这种算法由Laurens van der Maaten和Geoffrey Hinton于2008年开发。t-SNE主要用于可视化高维数据集在二维或三维空间的分布，特性是非线性、保留局部结构和高维可视化
 
@@ -87,7 +87,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 然后，我们对AlexNet在MNIST上计算的特征向量进行降维可视化，就可以看到，对于十种数字，的确倾向于不同的区域，这让我们知道，这个网络的确可以以某种方式对不同类进行编码
 
-![9](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/9-1683721026850-6.jpg)
+![9](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_10.jpg)
 
 ## 卷积激活的可视化
 
@@ -97,7 +97,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 对于特征图不为零的，我们与原始输入图像对齐，以下图为例，我们输入一张人像图，其中的一个卷积核实际上类似于人脸形状，这就是因为这个卷积核以某种方式与人脸或者人类肤色对齐了，所以让我们感觉，也许这个神经网络这一层内的卷积核以某种方式学会了对人脸或人类肤色做出反应
 
-![11](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/11.jpg)
+![EECS498_L14_12](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_12.jpg)
 
 我们可以将这些卷积激活进行可视化，让我们有一些直觉，去感觉这些不同的卷积核可能会响应什么不同特征
 
@@ -113,7 +113,7 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 还是那个训练好的模型，我们这一次选择中间的卷积层，然后输入所有的图像，并且找到那些所选神经元作出最高响应的图块，然后记录并且显示这些图块，我们就可以尝试了解所选神经元正在寻找什么特征
 
-![12](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/12.jpg)
+![EECS498_L14_13](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_13.jpg)
 
 从上图我们可以看到，第一行的元素，在尝试寻找狗鼻子样式的特征，或者看其他的元素，对应的最大激活区域都有很类似的特征
 
@@ -123,23 +123,23 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 我们准备了一些图片，并且通过某些方法抹去图片中的一小块区域（比如说11x11大小的一个正方形），然后将修改的图片和原图都放入神经网络，并且记录神经元的响应，看哪些区域跟原图的响应有区别，就说明这些区域对某个神经元的响应有重要影响，这样就可以得到一个map，表示图片中哪些区域对神经元最重要（下图中上方左数第二个）每一个图都这样处理和记录，然后将其对齐，移动到图像中心，就可以得到一个神经元的感受野
 
-![18](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/18.png)
+![18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/18.png)
 
 我们对每一层每个神经元都这样处理和记录，就可以得到其感受野，比如说上图中下方的示意图，我们发现，越高层的神经元感受野越大，并且不同神经元的感受野会有不一样的形状，此外，神经元的实际感受野比理论上的感受野要小（黄色区域是理论感受野，橙色区域是实际估计出的感受野，大概实际感受野的大小是理论感受野的四分之一）
 
 这种方法也有应用，可以利用神经元的响应去完成定位和分割
 
-![19](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/19-1685801717785-4.png)
+![19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/19-1685801717785-4.png)
 
 当然还有一些关于感受野的其他工作，比如说可以使用高斯分布去拟合感受野大小（上图），并且进行了理论证明
 
 我们使用这种方法，去查看神经元更喜欢什么样的特征，下面是基于某个训练好的模型上，第五个pool层的某个神经元，其实这个神经元就在寻找海洋或者海岸的特征
 
-![22](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/22.png)
+![22](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/22.png)
 
 当然这种方法，有时候也会被外观接近的不同类别的个体所影响，比如下图中，神经元在寻找台球桌（下图中上半部分）的过程中，就会被类似于台球桌的游泳池（下图中下半部分，红色框中）所干扰
 
-![25](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/25.png)
+![25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/25.png)
 
 ## 类激活映射（Class Activation Mapping）
 
@@ -147,21 +147,21 @@ AlexNet的FC7层有4096个特征，使用线性变换之后可以提供ImageNet�
 
 CAM的基本原理是在CNN最后一个卷积层之后添加全局平均池化层，然后通过权重的线性组合将特征图映射到类别得分，这样就将最后的预测层和最后一个卷积层直接联系起来了，最后一层卷积层得到的是检测器（也就是不同的神经元）检测的结果（如下图所示，每个类检测器都会对图像中相应类的对象，即下图中的热力图），如果乘以权重（代表了类别信息）并且进行线性叠加，就得到了一个**类激活图（Class Activation Map）**，表示对于某个类别，图片中哪些区域可以对分类有影响。通过反向传播，可以获得特征图中每个空间位置对于每个类别得分的重要性权重。
 
-![44](./assets/44-1685845535305-9.png)
+![44](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/44-1685845535305-9.png)
 
 CAM可视化结果表示为热度图，将特定类别的重要激活区域以高亮显示（也有定位的用途）。这些激活区域通常与输入图像中属于该类别的判别性区域相关联。CAM的目的是提供一种直观的方式来理解CNN在图像分类中的决策依据，并可用于可视化模型的关注区域。类激活映射在计算机视觉领域被广泛应用于解释和分析卷积神经网络模型的分类能力。
 
-![45](./assets/45-1685845922393-11.png)
+![45](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/45-1685845922393-11.png)
 
 对于不同的结果，都可以生成不同的类激活图，如上图所示，同时我们发现，使用全局平均池化层代替全连接层之后，预测精度只有极小幅度下降（2-3%），但是参数量大大减小，并且可以通过增加一两个卷积层的方式去提高网络的拟合能力，使得精度恢复
 
-![46](./assets/46-1685846173069-13.png)
+![46](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/46-1685846173069-13.png)
 
 ## 通过遮挡方式的显著性可视化
 
 所以我们可以尝试做的另一件事，是了解这些网络使用输入图像中的哪些像素来计算结果，这个对分类问题很重要
 
-![14](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/14-1683781791976-10.jpg)
+![EECS498_L14_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_15.jpg)
 
 我们还是有一个训练好的模型，然后我们输入一张大象图片，然后得到了正确的分类结果，我们想知道，其中哪些像素，对于网络将图片分类为大象这件事上，做出了更大贡献
 
@@ -179,13 +179,13 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 首先获取我们的输入图像，即这只可爱的狗（下图所示），然后在反向传播中，我们可以计算狗得分相对于输入图像中每个像素的梯度，这告诉我们输入图像中的每个像素，如果我们稍微改变那个像素，那么它会在多大程度上影响网络末端的分类分数，在显著性图中，亮度较高的区域表示这些像素对模型的决策影响较大
 
-![16](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/16-1683784173015-12.jpg)
+![EECS498_L14_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_17.jpg)
 
 利用这种图像梯度，我们可以得到一个**梯度显著性图（也叫梯度回传图）**，就上图右下角的有点类似于幽灵的图片，它告诉我们，最能改变分类分数的像素实际上是狗内部的像素，如果我们要更改狗外部的一些像素，那么分类分数可能不会改变那么多
 
 所以这再次让我们知道，神经网络正在查看图像的正确部分，你可以使用它来获得一些关于神经网络正在学习什么的直观理解（如下图所示）
 
-![17](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/17-1683788400246-14.jpg)
+![EECS498_L14_18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_18.jpg)
 
 但是注意一下，我们使用这种方式必须有一个已经训练好的模型了，如果我们在一个还没有训练好的模型上这样操作，那么我们得到的显著性图可能会非常杂乱
 
@@ -199,7 +199,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 我们已经得到了梯度的显著图，我们是不是可以根据这个显著图，去无监督的分割出图像中的对象，比如说下图中，我们可以分割出蚱蜢、蛇等对象
 
-![18](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/18-1683788433226-16.jpg)
+![EECS498_L14_19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_19.jpg)
 
 我们可以尝试使用这些显著图，并在这些神经网络计算所得的显着图上使用某种图像处理技术，然后我们就可以使用训练好的网络，来以某种方式实现对输入图像中与对象类别对应的部分的分割操作
 
@@ -217,7 +217,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 使用这种方法来可视化的时候，可以使图像变得更好，便于我们查看哪些像素对神经元的输出有更大影响，下图就展示了不同神经元在寻找哪些特征，或者说哪些像素的确对神经元的输出有重大影响
 
-![21](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/21.jpg)
+![EECS498_L14_22](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_22.jpg)
 
 ## 梯度上升（生成图像）
 
@@ -227,27 +227,27 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 同时我们也要使用正则化函数，来使得我们的图像变得自然，避免过拟合和保持生成的图像的可解释性，否则生成的图像可能会出现过度复杂、难以解释，或者在人类看来并不像是任何有意义图像的情况。这是因为神经网络可能会过度地在每个像素上调整细节，以获取可能的最大激活，而这些细节可能对人眼是无法理解的。
 
-![23](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/23-1683873239262-19.jpg)
+![EECS498_L14_24](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_24.jpg)
 
 具体来说，激活最大化首先选择一个神经元，然后创建一张随机噪声图像或者零元素图像。接着，它使用梯度上升方法来修改这张图像（这有些类似于训练网络模型，使损失函数最小），使得所选神经元的激活值最大化。这个过程持续多次迭代，直到图像收敛（如）。
 
-![24](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/24-1683873523401-21.jpg)
+![EECS498_L14_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_25.jpg)
 
 通过这种方式，我们可以生成一张图像，这张图像能够“激活”模型中的一个特定神经元。这可以帮助我们理解这个神经元在寻找什么样的特征，从而提供一种理解模型如何工作的方法。例如，对于一个图像分类模型，我们可以使用激活最大化来理解模型是如何识别出不同类别的。
 
-![27](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/27.jpg)
+![EECS498_L14_28](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_28.jpg)
 
 上面这张图就是使用已经训练好的模型，对神经元进行反向传播生成的一些最大化激活图像，可以看到一些有点粗糙的形状，因为所使用的正则化器不是特别好，所以图像并不是特别逼真，所以一直有人尝试发明更好的正则化器使得这种方式生成的图像更自然，比如说下图中的图像就更为自然
 
-![29](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/29.jpg)
+![EECS498_L14_30](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_30.jpg)
 
 当然，有的人对于使用更复杂的自然图像正则化器来生成看起来更逼真的图像这件事非常着迷，所以就有了一些非常奇特的正则化器，它实际上基于一个生成对抗网络，可以生成一些非常精美自然的图像（如下图所示）
 
-![34](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/34.jpg)
+![EECS498_L14_35](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_35.jpg)
 
 不过，所选的用于梯度上升的神经元越高层，生成的图像就更有语义，如下图所示
 
-![33](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/33.png)
+![33](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/33.png)
 
 这种研究方向的初衷是为了理解神经网络实际上在寻找什么，讲师Justin博士认为，越执着于强大的正则化器来寻找这些最大激活图像，就越会误入歧途，所以当他看到这样精美的图像时，很难说其中有多少是卷积神经网络实际正在寻找的；他倾向于使用简单的正则化器，认为这样才可以更纯粹地了解卷积神经网络在寻找什么样的原始图像和特征
 
@@ -259,7 +259,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 下图中，分别对大象和帆船图像中加入人类无法察觉的噪声，会导致神经网络预测结果的严重偏差。
 
-![36](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/36.jpg)
+![EECS498_L14_37](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_37.jpg)
 
 对抗性攻击揭示了深度学习模型在面对微小扰动时的脆弱性，这对于深度学习的安全性和鲁棒性研究具有重要意义。例如，在自动驾驶、医疗诊断等关键领域，对抗性攻击可能会导致严重的后果。
 
@@ -269,7 +269,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 特征反转（Feature Inversion）是一种在计算机视觉中常用的技术，旨在理解卷积神经网络的内部运行机制。其核心思想是，给定一个图像，得到神经网络中的特定层的特征表示，然后使用梯度下降法，试图重建一个在特征上与原始输入图像尽可能相近的图像。
 
-![37](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/37.jpg)
+![EECS498_L14_38](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_38.jpg)
 
 特征反转的过程通常是通过优化算法（如梯度下降或梯度上升）实现的。首先，我们从CNN中选择一个特定层，然后将一张输入图像通过网络进行前向传播，得到该层的特征表示。接下来，我们创建一张随机噪声图像，并通过网络前向传播到相同的层，得到该噪声图像的特征表示。然后，我们定义一个损失函数，其值为这两个特征表示之间的差异，最后使用优化算法来最小化这个损失。在这个过程中，噪声图像会被不断调整，使得它在网络中的特征表示尽可能接近原始图像的特征表示。
 
@@ -279,7 +279,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 在最开始的时候，我们发现，生成的图像与输入图像非常接近，几乎一致，意味着基本上所有的图像信息都被浅层神经元捕获，当层数增多，我们再反转的时候，我们发现越来越多的低级信息（局部的纹理和颜色这些）开始丢失，但是保留了图像的整体结构或者形状
 
-![38](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/38-1683887580865-28.jpg)
+![EECS498_L14_39](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_39.jpg)
 
 特征反转为我们提供了一种直观的方法，去理解神经网络中的每一层在图像识别过程中的作用，从而有助于我们更好地理解和改进神经网络模型。
 
@@ -297,13 +297,13 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 所以，当我们说DeepDream生成的是神经网络的“梦境”，实际上是指这个图像反映了网络在识别和解释世界时所学习到的特征。
 
-![47](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/47.jpg)
+![EECS498_L14_48](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_48.jpg)
 
 ## 纹理合成
 
 我们知道，计算机图形学里面有纹理合成的任务，我们想要做的是输入一些小图像块，提供一些规则纹理，然后我们想要生成一些文本，一些输出图像，这些图像可能要大得多（如下图所示），这个可以使用一些经典算法完成
 
-![51](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/51.jpg)
+![EECS498_L14_52](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_52.jpg)
 
 实证明我们实际上可以不用神经网络就可以做出很好的纹理合成，只要我们的纹理很简单，但是我们也可以使用神经网络来实现纹理合成，也就是使用梯度反传来解决纹理合成任务（类似于特征反转）
 
@@ -313,7 +313,7 @@ CAM可视化结果表示为热度图，将特定类别的重要激活区域以�
 
 我们选择神经网络的某个层，然后通过网络运行我们的纹理图像我们的目标图像，并且提取这个特征表示，对这些特征表示计算格拉姆矩阵，这将捕捉到图像中的纹理信息，这是因为网络的每一层都会输出一个特征图，这个特征图就是这一层的特征表示。这些特征图会随着网络层次的深入而逐渐从捕捉简单特征（或者说更细粒度的纹理特征或者低级特征）转向捕捉复杂特征（或者说更抽象的纹理特征），可以选择其中的一层或多层来提取特征表示。
 
-![55](https://raw.githubusercontent.com/Michael-Jetson/NoteImage/main/ML_DL_CV_with_pytorch/DL_img/assets/55-1683899985297-3.jpg)
+![EECS498_L14_56](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L14_56.jpg)
 
 选择的特征表示通常是一个形状为(C, H, W)的三维张量，其中C是通道数量，H和W分别是特征图的高和宽。为了计算格拉姆矩阵，你首先需要将这个3D张量转换为一个2D矩阵，形状为(C, H*W)，你可以通过reshape或flatten操作来实现这一步。然后，你计算这个2D矩阵与其自身的转置的乘积，得到的就是格拉姆矩阵，其形状为(C, C)。每个元素都是相应两个通道的特征向量的内积，可以被理解为这两个特征在图像中的相关性或共现度。
 

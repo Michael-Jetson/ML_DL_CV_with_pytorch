@@ -1,43 +1,3 @@
-
-[Source](https://zhuanlan.zhihu.com/p/21741716?refer=intelligentunit "Permalink to CS231n课程笔记翻译：神经网络笔记3（上） - 知乎专栏")
-
-# CS231n课程笔记翻译：神经网络笔记3（上） - 知乎专栏
-
-![CS231n课程笔记翻译：神经网络笔记3（上）]( https://pic3.zhimg.com/b629f243297cf32d2507bdaa1bc38e12_r.jpg)
-
-# CS231n课程笔记翻译：神经网络笔记3（上）
-
-![杜客](https://pic2.zhimg.com/5ab5b93bd_xs.jpg)
-
-[杜客][https://www.zhihu.com/people/du-ke]
-
-8 months ago
-
-译者注：本文[智能单元][2]首发，译自斯坦福CS231n课程笔记[Neural Nets notes 3__][7]，课程教师[Andrej Karpathy__][8]授权翻译。本篇教程由[杜客][6]翻译完成，[堃堃][9]和[巩子嘉][10]进行校对修改。译文含公式和代码，建议PC端阅读。
-
-## 原文如下
-
-内容列表：
-
-* 梯度检查
-* 合理性（Sanity）检查
-* 检查学习过程
-    * 损失函数
-    * 训练集与验证集准确率
-    * 权重：更新比例
-    * 每层的激活数据与梯度分布
-    * 可视化 **_译者注：上篇翻译截止处_**
-* 参数更新
-    * 一阶（随机梯度下降）方法，动量方法，Nesterov动量方法
-    * 学习率退火
-    * 二阶方法
-    * 逐参数适应学习率方法（Adagrad，RMSProp）
-* 超参数调优
-* 评价
-    * 模型集成
-* 总结
-* 拓展引用
-
 # 学习过程
 
 在前面章节中，我们讨论了神经网络的静态部分：如何创建网络的连接、数据和损失函数。本节将致力于讲解神经网络的动态部分，即神经网络学习参数和搜索最优超参数的过程。  
@@ -50,7 +10,7 @@
 
 所以我们需要找到一种非常好的学习率，使得网络既可以快速学习，也可以收敛到一个很好的状态，但是明显一个固定的学习率是无法完成这个任务的，我们需要使得学习率可以变化——先是较大的学习率，然后是更小的学习率
 
-![14](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/14-1683168009495-1.jpg)
+![EECS498_L11_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_15.jpg?raw=true)
 
 实际上也有很多不同的学习率的设置方法
 
@@ -58,7 +18,7 @@
 
 步进式递减的方式，就是在某些节点上降低学习率，比如说ResNet这种，就是每三十轮训练就会学习率变为原来的十分之一（如图）
 
-![15](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/15-1683168605246-3.jpg)
+![EECS498_L11_16](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_16.jpg?raw=true)
 
 可以看到，实际上每次步进后的第20-30个epoch，网络就会再次进入一个稳定状态，然后再一次进行学习率衰减，就可以重新进入一个相对快速的学习状态
 
@@ -68,7 +28,7 @@
 
 为了克服步进衰减的一些缺点，近年来余弦式衰减开始流行起来，使用一种余弦式函数来完成这个学习率衰减的过程
 
-![16](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/16-1683169550865-5.jpg)
+![EECS498_L11_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_17.jpg?raw=true)
 
 这个方式的好处就是，只有两个参数需要设置（初始学习率$\alpha_0$，训练周期T），更加方便
 
@@ -76,13 +36,13 @@
 
 这种最简单，学习率进行线性下降
 
-![17](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/17-1683169843163-7.jpg)
+![EECS498_L11_18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_18.jpg?raw=true)
 
 ### 平方根倒数衰减
 
 这是2017年提出的一种方案，但是存在的缺陷是，模型实际上在最初的高学习率上花费的时间少，在后面的低学习率上花费较多时间，而其他的衰减方案往往在初始的高学习率上花费更多时间，容易导致最开始的时候模型收敛缓慢
 
-![18](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/18-1683170295513-9.jpg)
+![EECS498_L11_19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_19.jpg?raw=true)
 
 ### 总结
 
@@ -175,7 +135,7 @@
 
 我们选择一些关心的超参数集，对其中每一个超参数，我们选择一些想要评估的数值集（对数线性的方式），然后测试不同的组合，比如说权重衰减和学习率从10的-1次方到-4次方，然后进行组合和尝试
 
-![22](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/22.jpg)
+![EECS498_L11_23](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_23.jpg)
 
 但是这需要非常多次的尝试，需要非常多的算力，而且要调整的次数是超参数数量的指数倍，故这不是一种很好的方法
 
@@ -187,13 +147,13 @@
 
 如果我们考虑超参数对模型影响的边缘分布的话，可能会出现下面的情况
 
-![24](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/24-1683177789838-12.jpg)
+![EECS498_L11_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_25.jpg)
 
 某些对模型性能无关紧要的超参数与某些有影响的超参数一起网格搜索的话，会产生无用的计算，得到的信息中很多事无用信息（或者说我们无法得到重要类型超参数的更多有效样本），但是随机搜索的话，可以获得更多信息，则可以进行对比
 
 下面是讲师使用大量GPU对不同网络模型进行多次试验得到分布图
 
-![25](https://raw.githubusercontent.com/Michael-Jetson/ML_DL_CV_with_pytorch/main/EECS498/assets/25-1683178826009-14.jpg)
+![EECS498_L11_26](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L11_26.jpg)
 
 ### 无大量GPU的方法
 
@@ -272,20 +232,211 @@
 
 ![][32]将神经网络第一层的权重可视化的例子。**左图**中的特征充满了噪音，这暗示了网络可能出现了问题：网络没有收敛，学习率设置不恰当，正则化惩罚的权重过低。**右图**的特征不错，平滑，干净而且种类繁多，说明训练过程进行良好。
 
-  # 代码实现
+# 代码实现：人脸表情识别
 
-前面是一系列的理论部分，接下来我们介绍如何使用代码完成这些操作
+前面是一系列的理论部分，接下来我们介绍如何使用代码完成这些操作，构建一个简单但是完整的项目，并且使用工业级项目的流程
 
-## 译者反馈
+![YSAI_ImageClassification_L3-1_4](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L3-1_4.png)
 
-1. **转载须全文转载且注明原文链接**，否则保留维权权利；
-2. 请知友们通过评论和私信等方式批评指正，贡献者均会补充提及；
-3. CS231n的翻译即将进入尾声，**欢迎知友们建议后续的翻译方向；**
-4. 知友@[猪皮][33]建议下一步的翻译方向是领域内的一些经典论文；
-5. 知友@[一蓑烟灰][34]在评论中详细解释了自己学习CS231n及本科毕设相关情况，建议下一步的翻译方向是课程作业解析。
+我们从网络上爬取一些有人脸表情标签的数据，然后将其中嘴部区域单独提取出来并且做成统一大小，然后以此作为训练集和验证集进行训练
 
-「请大家重点建议接下来的翻译方向！」
+## 数据准备
 
+有三种方式，数据集，外包平台或者网络爬虫
+
+数据集可以直接使用公开的数据集
+
+外包平台适用于大公司大团队定制数据集
+
+网络爬虫可以自己爬取，成本低，种类丰富，速度快
+
+### 人脸表情识别开源数据集
+
+其中除去针对标签的数据集，针对人脸属性的数据集主要是Celeba等
+
+![YSAI_ImageClassification_L3-2_3](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L3-2_3.png?raw)
+
+### 网络爬虫
+
+我们可以通过这个爬虫工具，在百度上搜索带有某个关键词的图片，并且批量保存和规范化命名
+
+![YSAI_ImageClassification_L3-2_4](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L3-2_4.png)
+
+## 数据预处理
+
+在准备好了爬虫搜集的数据之后，我们需要对其进行处理，剔除一些不好的数据，这样子在训练的时候效果更好，具体的操作如下
+
+![YSAI_ImageClassification_L3-2_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L3-2_17.png)
+
+并且我们需要使用经典算法，进行人脸检测，并且把嘴部区域单独摘出来
+
+![YSAI_ImageClassification_L3-2_25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L3-2_25.png)
+
+## 读取数据与增强
+
+图像分类任务可以直接使用`torchvision`包来读取数据，只要我们的文件夹目录格式正确，就可以一键完成读取
+
+一般来说，我们会把所有的训练数据放到`data`文件夹下，然后data文件夹分为训练集`train`和验证集`val`，每个集合都包括多个类的子文件夹，这些会被`torchvision`自动转成标签，减少工作量
+
+```python
+import torchvision.dataset as dataset
+import torchvision.transforms as transforms 
+data_dir='./data'#数据集总目录
+train_dataset=ds.ImageFolder(os.path.join(data_dir,'train'),data_transforms)#读取数据，转为Dataset实例
+dataloader=data.DataLoader(data)#转化为DataLoader实例，便于下一步的训练
+```
+
+这个代码的作用就是，从数据目录里面读取数据的信息，并且进行一些操作（比如说裁剪和翻转等），然后生成DataLoader实例
+
+### Dataset类：读取并处理数据
+
+Dataset类在PyTorch中可以说是最重要的部分了，如果我们搞清楚了，就可以创建适应任意模型的数据集接口，去读取数据集中的每个数据进行训练
+
+所谓数据集，无非就是一组{x,y}的集合，x是数据，y是标签，你只需要在这个类里说明“有一组{x,y}的集合”就可以了。
+
+对于图像分类任务，图像+分类
+
+对于目标检测任务，图像+bbox、分类
+
+对于超分辨率任务，低分辨率图像+超分辨率图像
+
+对于文本分类任务，文本+分类
+
+你只需在代码中定义好这个项目的x和y是什么，然后在运行的时候计算机就会自动读取并且处理你的数据，幸运的是，PyTorch官方给我们提供了一个基类Dataset类，我们可以在这个的基础上轻松实现这些操作
+
+我们看一下Dataset的官方代码，其中`__getitem__`和`__len__`是子类必须继承的方法，也就是我们在自定义数据集代码的时候，要继承并且重写，`__getitem__`就是获取特定位置的{x,y}，`__len__`就是获取数据集的大小（或者说数据的长度），这样子我们就可以读取到数据集中的所有数据了
+
+```python
+class Dataset(object):
+    """An abstract class representing a Dataset.
+    All other datasets should subclass it. All subclasses should override
+    ``__len__``, that provides the size of the dataset, and ``__getitem__``,
+    supporting integer indexing in range from 0 to len(self) exclusive.
+    """
+ 
+    def __getitem__(self, index):
+        raise NotImplementedError
+ 
+    def __len__(self):
+        raise NotImplementedError
+ 
+    def __add__(self, other):
+        return ConcatDataset([self, other])
+```
+
+假设我们要进行一个二分类任务，要识别一元和一百元的纸币，在`data`目录下有名为1和100的文件夹，其中存放一些对应的照片（只考虑纯照片并且格式统一的情况），我们给出一个示例，展示如何具体的去构建数据集代码
+
+首先是导包，我们需要导入一些有利于我们构建数据集代码的函数
+
+```python
+import os#用于路径处理
+from PIL import Image#用于加载图片
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms#用于确定图像处理方式
+```
+
+然后我们去具体的构造一个类，来处理路径下的所有文件，一般来说，确定数据的标签有两种方法，一种是分文件夹存放，比如说百元大钞和一元钞票的图像，分别存放在两个文件夹中，那么我们可以以文件夹作为标签并且作一个映射，一般是映射到不同的数字（表示不同类别）
+
+```python
+class RMBDataset(Dataset):
+    def __init__(self, data_dir, transform=None):
+        """
+        rmb面额分类任务的Dataset
+        :param data_dir: str, 数据集所在路径
+        :param transform: torch.transform，图像数据预处理
+        """
+        self.label_name = {"1": 0, "100": 1}#构建映射
+        self.data_info = self.get_img_info(data_dir)#这个方法用于遍历给定目录下的所有图像文件，收集它们的路径和标签
+        self.transform = transform#图像预处理的方法
+ 
+    def __getitem__(self, index):
+        path_img, label = self.data_info[index]
+        img = Image.open(path_img).convert('RGB')
+        if self.transform is not None:
+            img = self.transform(img)
+        return img, label
+ 
+    def __len__(self):
+        return len(self.data_info)
+ 
+    def get_img_info(self, data_dir):
+        # data_dir是数据集根目录，下面有一系列的类别文件夹
+        data_info = list()# 存放数据的列表
+        for file_dir in os.lisdir(data_dir):
+            # 先遍历类别，后遍历文件，这里file_dir是类别名也是子文件夹名
+            for filename in os.listdir(os.path.join(data_dir,file_dir)):
+                #这里filename就是图片全名了，比如说100.png
+                path_img = os.path.join(data_dir, file_dir, filename)
+                label = self.label_name[sub_dir]
+                data_info.append((path_img, int(label)))
+    return data_info
+```
+
+这个数据集类，就是通过图像的路径和标签，然后加载图像数据（或者其他类型的数据）和标签用于下一步的训练
+
+不过注意一下，我们只是提前加载了索引关系，并没有直接加载图片内容，这就好比说我们记录了一个地址簿，我们可以通过地址去找到具体的人，这里的自定义数据集类就好比那个地址簿，提前记录了所有的数据对应关系，当需要使用的时候就去加载
+
+至于为什么不能提前加载呢，这是因为数据想要使用就要先从磁盘读取放到内存中，但是如果我们一次性加载了所有的数据，那么内存会爆掉，目前的数据集大一点的就以GB计算，一般情况下内存无法直接加载所有的数据集，只能先定义索引便于寻找，然后到具体用到某些数据的时候再去加载
+
+我们看一下是如何定义这种关系的，首先是在`get_img_info`函数，顾名思义就是得到图像信息的函数，是用来构建数据列表的，它返回数据列表data_info，data_info中的元素由元组(图像路径，图像标签)构成，或者可以这样理解，我们记录了所有的数据集的位置和标签（信息保存在列表中），然后在需要具体要使用的时候，就根据位置去读取图片并且进行一些处理，然后送进深度学习模型中，而具体读取的步骤就是通过方法`__getitem___`实现的，读取图片数据，然后进行预处理，返回数据和标签
+
+```python
+    def get_img_info(self, data_dir):
+        # data_dir是数据集根目录，下面有一系列的类别文件夹
+        data_info = list()# 存放数据的列表
+        for file_dir in os.lisdir(data_dir):
+            # 先遍历类别，后遍历文件，这里file_dir是类别名也是子文件夹名
+            for filename in os.listdir(os.path.join(data_dir,file_dir)):
+                #这里filename就是图片全名了，比如说100.png
+                path_img = os.path.join(data_dir, file_dir, filename)
+                label = self.label_name[sub_dir]
+                data_info.append((path_img, int(label)))
+    return data_info
+```
+
+然后我们定义了这个数据集类就可以在主函数中使用了，一般来说会对训练集图像进行一些预处理，比如说规范大小、随机裁剪，然后将其从0-255的像素转化为0-1的张量，最后进行归一化，归一化的参数是给定的，这个参数是大量图片统计而来的，当然也可以自行修改（但是不建议）
+
+```python
+if __name__ == '__main__':
+    norm_mean = [0.485, 0.456, 0.406]
+    norm_std = [0.229, 0.224, 0.225]
+    train_transform = transforms.Compose([
+        transforms.Resize((32, 32)),
+        transforms.RandomCrop(32, padding=4),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std),
+    ])
+    train_data = RMBDataset("./data/train", train_transform)
+    train_loader = DataLoader(dataset=train_data, batch_size=4, shuffle=True)
+```
+
+我们在主函数中直接实例化一个我们自定义的人民币数据集对象，并且传入数据集的根目录和预处理的方法，然后构建`DataLoader`这个东西，这个东西就是将数据送入网络的关键
+
+同时注意一下，一般来说是训练集和验证集分别设置Dataset和DataLoader的
+
+### DataLoader：加载数据
+
+实际上，我们读取和处理数据只是一步，还有一步就是真正的去加载数据并且送入网络中训练，这种时候就需要使用`DataLoader`对象了，这一步我们不需要自己定义怎么加载了，直接使用即可
+
+```
+DataLoader(dataset, batch_size=1, num_workers=4, shuffle=False)
+```
+
+- dataset：需要载入的数据集
+- batch_size：批量大小，也就是迭代器一次送多少个样本到网络中去训练（一般为了充分利用GPU并行计算的性能，我们会一次送入很多样本去训练）
+- num_workers：使用多少个子进程来加载数据，0表示只在主进程中加载数据。Pytorch会根据此参数来判断是创建单进程SingleProcessDataLoaderIter类对象，还是创建多进程MultiProcessingDataLoaderIter类对象
+- shuffle：是否在每个epoch训练前打乱数据集中的样本顺序
+
+`DataLoader`的角色，我们可以理解为是一个勤勤恳恳每次都拿出同样数量的数据样本送到网络中的工人，我们提供了一份地址簿（`Dataset`类提供的），存放着数据样本的地址和标签，然后这个工人就会勤勤恳恳的按照这个地址过去把一堆数据拿到内存中（调用的是`Dataset`类的`__getitem__`方法），然后放入网络进行训练
+
+## 网络模型
+
+实际上，我们可以使用现成的模型，也可以自定义模型，而在`torchvision.models`中就有很多经典模型，包括AlexNet、ResNet、ViT等等，我们可以直接加载这些模型，也可以使用预训练好的模型直接操作，在这里我们选择使用直接调用模型
+
+## 可视化：tensorboardX
+
+这是一个TensorFlow中的可视化工具，可以记录数据并且可视化出来，很适合深度学习
 
 [1]: https://pic4.zhimg.com/4a97d93d652f45ededf2ebab9a13f22b_m.jpeg
 [2]: https://zhuanlan.zhihu.com/intelligentunit

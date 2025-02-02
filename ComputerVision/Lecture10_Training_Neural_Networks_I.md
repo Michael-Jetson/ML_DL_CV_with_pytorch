@@ -1,43 +1,16 @@
-[Source](https://zhuanlan.zhihu.com/p/21560667?refer=intelligentunit "Permalink to CS231n课程笔记翻译：神经网络笔记 2 - 知乎专栏")
-注：这篇格式可能有较大问题
-
-# CS231n课程笔记翻译：神经网络笔记 2 - 知乎专栏
-
-![CS231n课程笔记翻译：神经网络笔记 2][4]
-
-# CS231n课程笔记翻译：神经网络笔记 2
-
-![杜客][5][杜客][6]
-
-8 months ago
-
-译者注：本文[智能单元][2]首发，译自斯坦福CS231n课程笔记[Neural Nets notes 2__][7]，课程教师[Andrej Karpathy__][8]授权翻译。本篇教程由[杜客][6]翻译完成，[堃堃][9]进行校对修改。译文含公式和代码，建议PC端阅读。
-
-## 原文如下
-
-内容列表：
-
-* 设置数据和模型
-    * 数据预处理
-    * 权重初始化
-    * 批量归一化（Batch Normalization）
-    * 正则化（L2/L1/Maxnorm/Dropout）
-* 损失函数
-* 小结
-
 # 激活函数
 
-我们指导，在人工神经元中总是要有一个激活函数（非线性），这对于提高神经网络的处理能力是很有必要的，否则神经网络的所有操作都会被折叠成一个线性层上
+我们知道，在人工神经元中总是要有一个激活函数（非线性），这对于提高神经网络的处理能力是很有必要的，否则神经网络的所有操作都会被折叠成一个线性层上，实际上，人工神经元的拟合能力，主要来自于这个激活函数
 
 ## 不同激活函数集合
 
 常见的激活函数有这些（如图）
 
-![8](./assets/8.jpg)
+![EECS498_L10_9](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_9.jpg)
 
 ## Sigmoid函数
 
-![18](./assets/18.jpg)
+![18](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_19.jpg)
 
 这是前几十年最经典的激活函数，具有S曲线形状，可以使用概率解释，即这个神经元要么打开要么关闭，其值域可以代表特征存在的概率，所以可以用来作为布尔变量
 
@@ -47,7 +20,7 @@
 
 - 同时，其输出不是以零为中心的，是始终为正值的，如果发生这种情况：这是神经网络中一个神经元的小图
 
-  ![14](./assets/14.jpg)
+  ![EECS498_L10_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_15.jpg)
 
   因为这是在神经网络中，所有的输入信号都来源于上一个神经元并且也是正的，如果上流梯度是一个标量，那么如果这个上流梯度为正，那么会导致这个神经元的梯度为正，从而导致整个神经网络的梯度为正，或者为负，即容易导致整个神经网络的梯度正负相同，权重更新就容易陷入不均匀状态，导致学习效率减慢而且优化困难
 
@@ -87,7 +60,7 @@ $$
 
 不同的激活函数在不同网络中可能有不同表现，下面就是在CIFAR10数据集上，使用多种网络搭配不同激活函数进行训练的结果对比，可以看到，同一个激活函数在不同网络中表现不同
 
-![31](./assets/31.jpg)
+![EECS498_L10_32](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_32.jpg)
 
 但是，对激活函数没必要强调太多，可以直接使用ReLU函数即可
 
@@ -111,6 +84,17 @@ $$
 
 关于数据预处理我们有3个常用的符号，数据矩阵 **X**，假设其尺寸是[**N x D]**（**N**是数据样本的数量，**D**是数据的维度）。
 
+在使用PyTorch框架处理图片类型的数据时，数据通常以四维张量（4D tensor）的形式存储。这个四维张量的每个维度具有特定的意义：
+
+1. **批次大小（Batch Size）**：这是第一个维度，表示在一个批次中有多少张图片。在训练深度学习模型时，通常不会一次处理单张图片，而是将多张图片打包成一个批次进行处理。这样做可以提高内存利用率，加速训练过程，并有助于模型的泛化。
+2. **通道数（Channels）**：这是第二个维度，表示每张图片的通道数。对于普通的彩色图片，这通常是3（红色、绿色、蓝色），对于灰度图像，这个数值是1。在某些特殊应用中，比如卫星图像处理，可能会有更多的通道。
+3. **高度（Height）**：这是第三个维度，表示图片的高度，即像素的垂直数量。
+4. **宽度（Width）**：这是第四个维度，表示图片的宽度，即像素的水平数量。
+
+总结起来，如果我们有一个批次的图片数据，其张量的形状可以表示为 `[Batch Size, Channels, Height, Width]`。例如，如果你有一个包含32张彩色图片的批次，每张图片的大小为64x64像素，那么这个张量的形状将是 `[32, 3, 64, 64]`。
+
+在PyTorch中，这种数据布局有时被称为“NCHW”格式（N代表批次大小，C代表通道数，H代表高度，W代表宽度）。这种格式是深度学习中处理图像数据的标准方式之一。
+
 **均值减法（Mean subtraction）** 是预处理最常用的形式。它对数据中每个独立_特征_减去平均值，从几何上可以理解为在每个维度上都将数据云的中心都迁移到原点。在numpy中，该操作可以通过代码 **X -= np.mean(X, axis=0)** 实现。而对于图像，更常用的是对所有像素都减去一个值，可以用 **X -= np.mean(X)** 实现，也可以在3个颜色通道上分别操作。
 
 至于作用。可以联想一下Sigmoid的非零中心化的问题，这里也是同理
@@ -119,7 +103,7 @@ $$
 
 实际上，归一化的用处很大，对于某些未归一化的数据，可能优化上会非常困难（如下图左），可能一点小优化都会导致非常大的误差，或者说一点小改动都会造成系统性能的巨大变化，但是在归一化之后，就会变得容易优化（如下图右）
 
-![38](./assets/38.jpg)
+![EECS498_L10_39](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_39.jpg)
 
 ——————————————————————————————————————————
 
@@ -219,7 +203,7 @@ PCA/白化。**左边**是二维的原始数据。**中间**：经过PCA操作�
 
 我们以CIFAR10的图片为例来考虑这些
 
-![39](./assets/39.jpg)
+![EECS498_L10_40](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_40.jpg)
 
 ## 权重初始化
 
@@ -253,13 +237,13 @@ _**警告**。_并不是小数值一定会得到好的结果。例如，一个�
 
 但是，对于ReLU函数，这种初始化容易出现问题，ReLU函数会将传递信号的方差减小，也就是说随着信号传递，梯度会逐渐接近零，这不利于神经网络的训练，如图所示，随着信号的传递，方差越来越小
 
-![60](./assets/60-1683006903639-5.jpg)
+![EECS498_L10_61](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_61.jpg)
 
 Glorot等在论文[Understanding the difficulty of training deep feedforward neural networks__][33]中作出了类似的分析。在论文中，作者推荐初始化公式为![ \( text{Var}\(w\) = 2/\(n_{in} + n_{out}\) \) ][34]，其中![\(n_{in}, n_{out}\)][35]是在前一层和后一层中单元的个数。这是基于妥协和对反向传播中梯度的分析得出的结论。该主题下最新的一篇论文是：[Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification__][36]，作者是He等人。文中给出了一种针对ReLU神经元的特殊初始化，并给出结论：网络中神经元的方差应该是![2.0/n][37]。代码为**w = np.random.randn(n) * sqrt(2.0/n)**。这个形式是神经网络算法使用ReLU神经元时的当前最佳推荐，但是这种方法对残差网络并不是很有用。
 
 假设我们有一个残差网络，并且以某种方式构建了初始化权重，同时使用残差连接来包裹这些层，那么输出和输入的方差已经匹配了
 
-![63](./assets/63.jpg)
+![EECS498_L10_64](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_64.jpg)
 
 如果我们使用MSRA方法进行初始化，那么输出的方差就会更大，这样多层传递下去，就会导致最后一层的方差非常大，容易造成梯度爆炸，不利于学习
 
@@ -367,7 +351,7 @@ def predict(X):
 
 这个与Dropout类似，但是不一样的是，这种方法是使得神经元之间的连接失活，而不是使神经元失活
 
-![92](./assets/92-1683012643096-8.jpg)
+![EECS498_L10_93](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_93.jpg)
 
 **前向传播中的噪音**在更一般化的分类上，随机失活属于网络在前向传播中有随机行为的方法。测试时，通过_分析法_（在使用随机失活的本例中就是乘以![p][51]）或_数值法_（例如通过抽样出很多子网络，随机选择不同子网络进行前向传播，最后对它们取平均）将噪音边缘化。在这个方向上的另一个研究是[DropConnect][60]，它在前向传播的时候，一系列权重被随机设置为0。提前说一下，卷积神经网络同样会吸取这类方法的优点，比如随机汇合（stochasticpooling），分级汇合（fractionalpooling），数据增长（dataaugmentation）。我们在后面会详细介绍。
 
@@ -383,13 +367,13 @@ def predict(X):
 
 这里是将神经网络每个池化层区域的感受野大小进行随机化
 
-![93](./assets/93.jpg)
+![EECS498_L10_94](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_94.jpg)
 
 **随机深度Stochastic Depth**
 
 随机让某些模块死亡
 
-![94](./assets/94.jpg)
+![EECS498_L10_95](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L10_95.jpg)
 
 **混合Mixup**
 
@@ -545,6 +529,7 @@ _注意_：L2损失比起较为稳定的Softmax损失来，其最优化过程要
 [82]: http://zhihu.com/equation?tex=L_i%3D%7C%7Cf-y_i%7C%7C_1%3D%5Csum_j%7Cf_j-%28y_i%29_j%7C
 [83]: http://zhihu.com/equation?tex=%5Csum_j
 [84]: http://zhihu.com/equation?tex=%5Cdelta_%7Bij%7D
+
 [85]: http://zhihu.com/equation?tex=%5Cpartial+L_i%2F%5Cpartial+f_j
 [86]: http://zhihu.com/equation?tex=sign%28%5Cdelta_%7Bij%7D%29
 [87]: http://zhihu.com/equation?tex=%5Csqrt%7B2%2Fn%7D

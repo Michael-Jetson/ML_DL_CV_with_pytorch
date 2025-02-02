@@ -95,23 +95,23 @@ _神经元的三维排列_。卷积神经网络针对输入全部是图像的情
 
 一次卷积操作，示意图如下
 
-![15](./assets/15.jpg)
+![15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L7_16.jpg?)
 
-我们使用一个卷积核或者过滤器，进行卷积操作，并且将输出结果组成一个特征图，这个过程是线性的，一个核就是一个模板，输出结果就是这块图像与模版的匹配程度
+我们使用一个卷积核或者过滤器，进行卷积操作，并且将输出结果组成一个特征图，这个过程是线性的，一个核就是一个模板，输出结果就是这块图像与模版的匹配程度（或者可以这样理解，一个卷积核就表示一种特征，输出的结果就是卷积核在此处进行匹配操作的得分或者相似度，得分越高，说明此处局部图像就与卷积核要寻找的特征越相似，然后卷积核的参数是可以改变的，或者说是可学习的，也就是卷积核要寻找的特征是会变化的，卷积核会去寻找最有用的特征，或者说最有助于降低分类误差的特征）
 
 实际上，一个卷积核是不够的，会存在多个卷积核，并且以多维张量的形式表示
 
-![17](./assets/17.jpg)
+![17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L7_18.jpg?)
 
 这里有六个卷积核，所以卷积核为一个四维张量，每个卷积核大小为3\*5\*5
 
-![23](./assets/23.jpg)
+![23](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L7_24.jpg?)
 
 如果我们进行多次卷积操作，那么一张3\*32\*32的图片，经过大小为6\*3\*5\*5的卷积核卷积，就得到六张特征图，大小为6\*28\*28
 
 但是，我们并不能直接这样操作，因为实际上卷积是线性操作，多个卷积仍然是线性网络，所以我们需要加上激活函数，这样才可以更好的学习
 
-![25](./assets/25.jpg)
+![25](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L7_26.jpg?raw=true)
 
 卷积神经网络的核心依然是学习模板，只不过是分层学习，不同层的网络学习不同的模板，第一层学习一些局部的模板（比如说特定边缘），
 
@@ -292,7 +292,7 @@ _**译者注**：请点击图片查看动画演示。如果gif不能正确播放
 
 从下图可以看到，加上归一化层之后，更有利于模型收敛
 
-![87](./assets/87.jpg)
+![87](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L7_88.jpg?)
 
 这是因为，每一层看到的都是上一层的输出，但是上一层的权重是会进行学习的，上一次输出的分布也是会改变的，某种意义上不利于优化，所以需要标准化所有层
 
@@ -498,6 +498,7 @@ _因为内存限制所做的妥协_：在某些案例（尤其是早期的卷积
 [20]: http://zhihu.com/equation?tex=P%3D0
 [21]: http://zhihu.com/equation?tex=F%3D3
 [22]: http://zhihu.com/equation?tex=S%3D2
+
 [23]: http://zhihu.com/equation?tex=%28W-F%2B2P%29%2FS%2B1%3D%2810-3%2B0%29%2F2%2B1%3D4.5
 [24]: http://link.zhihu.com/?target=http%3A//papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks
 [25]: http://zhihu.com/equation?tex=F%3D11

@@ -2,13 +2,13 @@
 
 最常见的传感器是相机，并且经常性使用环视图（如下图所示），但是输入是没有BEV空间的，所以需要将输入图像从2D转3D然后转换得的BEV空间，这也是一个很核心的任务，3D是一个很重要的媒介
 
-![AutoDriveHeart_BEV_L2_9](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_9.png)
+![AutoDriveHeart_BEV_L2_9](./assets/AutoDriveHeart_BEV_L2_9.png)
 
 我们知道，3D到BEV空间是很容易的，所以我们可以将图像从2D转换到3D下
 
 我们先根据图像的生成原理。下面$O_c$是相机原点，$P(X_c,Y_c,Z_c)$是物体三维坐标或者说世界坐标，$p(x,y)$是图像坐标，有了内参矩阵和世界坐标，我们就可以得到图像坐标，但是反过来就不一定了，确定了一个图像坐标，无法反过来确定世界坐标，这是因为维度缺失（或者说深度缺失）的问题
 
-![AutoDriveHeart_BEV_L2_10](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_10.png)
+![AutoDriveHeart_BEV_L2_10](./assets/AutoDriveHeart_BEV_L2_10.png)
 
 但是如果我们已知$p(x,y)$是某个已知深度的三维点的投影，我们就可以做到反过来的一一对应
 
@@ -18,7 +18,7 @@
 
 这是英伟达发表于CVPR2020的工作，非常经典，可以从2D到BEV空间，很多工作比如说CaDDN和BEVDet都是根据这个工作去改进的
 
-![AutoDriveHeart_BEV_L2_11](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_11.png)
+![AutoDriveHeart_BEV_L2_11](./assets/AutoDriveHeart_BEV_L2_11.png)
 
 输入是多视图的图像，输出是BEV空间，
 
@@ -28,7 +28,7 @@
 
 因为在一条线上所有的点，投影到平面上对应的点只有一个，所以LSS的做法就是将线段离散为一段段，然后去评估概率分布，同时为每个像素分配一个长度为C的特征向量，表示像素特征，然后与概率向量相乘就得到了下图中的矩阵或者说特征图
 
-![AutoDriveHeart_BEV_L2_12](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_12.png)
+![AutoDriveHeart_BEV_L2_12](./assets/AutoDriveHeart_BEV_L2_12.png)
 
 这样操作总的来说容易很多
 
@@ -38,7 +38,7 @@
 
 我们有图像和深度，就可以和三维空间的点一一对应了，这种是通过图像得到的点云，所以称为伪点云
 
-![AutoDriveHeart_BEV_L2_13](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_13.png)
+![AutoDriveHeart_BEV_L2_13](./assets/AutoDriveHeart_BEV_L2_13.png)
 
 这种方法的好处就是可以使用通用三维框架处理，但是这种方法是使用深度图得到的，所以如果深度图不准就无法得到良好的点云，自然会影响进一步的应用
 
@@ -64,7 +64,7 @@
 
 总的来说，是先生成初始的三维点，然后去寻找对应的二维点的特征进行补充，这就是经典3D到2D的过程，除去环视图可以这样处理，多模态的输入也可以这样处理
 
-![AutoDriveHeart_BEV_L2_17](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_17.png)
+![AutoDriveHeart_BEV_L2_17](./assets/AutoDriveHeart_BEV_L2_17.png)
 
 "Explicit Mapping"（显式映射）是一种用于从原始传感器数据（如摄像头图像）生成BEV表示的方法。这种方法直接利用几何变换将传感器数据映射到鸟瞰视图坐标系。
 
@@ -76,7 +76,7 @@
 
 先使用不同的骨干网络提取特征，然后使用一种3D Reference Point的方法进行多模态的特征融合，那么参考点的作用是什么呢？我们有了三维的参考点，就可以投影到不同的模态上，从不同模态的不同位置拿不同的特征，实际上就是一个特征采样的过程
 
-![AutoDriveHeart_BEV_L2_18](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_18.png)
+![AutoDriveHeart_BEV_L2_18](./assets/AutoDriveHeart_BEV_L2_18.png)
 
 采样好的特征通过级联的方式经过一个MLP网络投射到共同的特征空间中，然后就可以用特征来做预测了，这样可以融合不同的信息来做判断决策
 
@@ -90,7 +90,7 @@
 
 还有一个问题，就是这个是Point到Feature的过程，Point是局部特征，对于其他位置是无法采样的，实际上这对BEV空间来说是一种稀疏表示，对全局特征的学习不够充分，所以需要改进
 
-![AutoDriveHeart_BEV_L2_19](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_19.png)
+![AutoDriveHeart_BEV_L2_19](./assets/AutoDriveHeart_BEV_L2_19.png)
 
 我们在想，能不能摆摊参考点的限制，使用一种自适应的方法去学习二维特征和三维空间的对应关系，并且尝试作一种全局的特征表达，这就是隐式对应的思想，PETR就是这样做的
 
@@ -100,7 +100,7 @@
 
 输入除了标准的多视图，还有一个3D点生成器，输出也是检测结果
 
-![AutoDriveHeart_BEV_L2_20](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_20.png)
+![AutoDriveHeart_BEV_L2_20](./assets/AutoDriveHeart_BEV_L2_20.png)
 
 其中的三维坐标生成器，作用是将图像平面转换到世界空间，实际上就是一个2D到3D的转换过程，将相机视锥的覆盖区域映射到三维空间当中并且生成一系列坐标点
 
@@ -108,19 +108,19 @@
 
 Transformer实际上就是一种注意力机制
 
-![AutoDriveHeart_BEV_L2_22](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_22.png)
+![AutoDriveHeart_BEV_L2_22](./assets/AutoDriveHeart_BEV_L2_22.png)
 
 ## 空间注意力：STN
 
 这是一个很经典的空间注意力的工作，空间变换神经网络STN可以在空间中对形变的数据进行转换，并且自动捕获重要区域的特征
 
-![AutoDriveHeart_BEV_L2_23](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_23.png)
+![AutoDriveHeart_BEV_L2_23](./assets/AutoDriveHeart_BEV_L2_23.png)
 
 ## 通道注意力：SENet
 
 这是一种很重要的注意力机制，在很多BEV算法中都可以看到，其作用是可以加强某些通道的特征，削弱某些通道的特征，迫使网络更关注某些通道，或者说对某些特征明显的通道特征做重点关注，并且忽略一些不明显的通道特征
 
-![AutoDriveHeart_BEV_L2_24](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_24.png)
+![AutoDriveHeart_BEV_L2_24](./assets/AutoDriveHeart_BEV_L2_24.png)
 
 ## 混合注意力
 
@@ -128,13 +128,13 @@ Transformer实际上就是一种注意力机制
 
 其使用串行结构，先对通道特征进行加强，然后对空间维度进行加强，网络可以自适应的细化特征，当然还可以使用并行结构
 
-![AutoDriveHeart_BEV_L2_25](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_25.png)
+![AutoDriveHeart_BEV_L2_25](./assets/AutoDriveHeart_BEV_L2_25.png)
 
 ## Transformer：self-attention
 
 Transformer实际上是一个特征提取模块，动机是计算给定的序列的各个位置之间的关系（或者说影响程度）
 
-![AutoDriveHeart_BEV_L2_26](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_26.png)
+![AutoDriveHeart_BEV_L2_26](./assets/AutoDriveHeart_BEV_L2_26.png)
 
 这里的核心是三个量，查询向量Query，键值向量Key，值向量Value，这是一种查询机制，用来查询和其他特征之间的关系（包括自身），键值向量Key是被用来计算关系（或者说相似度的），比如说我们想得知$a^1$和$a^2$之间的关系，就可以拿前者的Query查询后者的Key
 
@@ -144,7 +144,7 @@ Transformer主要是针对序列特征，其在NLP中是经常性存在的，但
 
 ViT是很经典的工作，其思想就是将图像切分为大小相等的图像块，每一个块称为一个Patch，每个Patch可以提取特征映射到特定的维度，在ViT中这个维度是768，这样，我们就可以将一个完整的图像转化为一个图像序列
 
-![AutoDriveHeart_BEV_L2_27](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_27.png)
+![AutoDriveHeart_BEV_L2_27](./assets/AutoDriveHeart_BEV_L2_27.png)
 
 但是，如果单纯的切分并且转化为序列，就会损失位置信息，Transformer并不知道某个Patch是图像的哪个部分的，无法衡量图像中的空间信息，所以作者引入了位置编码的方式，实际上就是将每个patch的位置信息编码融合到视觉特征中然后一起送入Transformer Encoder，然后得到的特征是包括输入特征两两元素之间的关系的，然后通过一个MLP进行映射分类（ViT提出的时候就是为了分类任务的）
 
@@ -156,7 +156,7 @@ ViT是很经典的工作，其思想就是将图像切分为大小相等的图�
 
 Swing Transformer的思路就是，Patch中再划分Patch，块内再进行self attention
 
-![AutoDriveHeart_BEV_L2_28](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_28.png)
+![AutoDriveHeart_BEV_L2_28](./assets/AutoDriveHeart_BEV_L2_28.png)
 
 这两个也是Transformer在视觉中的最基础工作，也是最开始的应用
 
@@ -168,7 +168,7 @@ Swing Transformer的思路就是，Patch中再划分Patch，块内再进行self 
 
 Encoder部分整体框架跟ViT一样，只不过输入的是图像的特征（通过CNN处理）和位置编码，然后进行Transformer处理，就得到了一个序列化的有自注意力关系的特征，并且可以作为一个2D Backbone存在，并且Transformer可以帮助网络很好地提取不同位置不同物体之间的关系
 
-![AutoDriveHeart_BEV_L2_29](/home/pengfei/文档/ML_DL_CV_with_pytorch/BEV/assets/AutoDriveHeart_BEV_L2_29.png)
+![AutoDriveHeart_BEV_L2_29](./assets/AutoDriveHeart_BEV_L2_29.png)
 
 在Decoder部分，我们有了图像特征之后，我们使用Object Queries（这个决定模型最终预测多少个框），通过Query和特征进行查询，我们进行Self-Attention操作，得到最终的输出的框，在原始论文中这个数量是100，也就是说对任何图片都会输出100个框（会删除置信度过低的）
 

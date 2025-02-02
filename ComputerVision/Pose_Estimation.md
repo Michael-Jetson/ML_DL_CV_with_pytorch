@@ -19,15 +19,15 @@
 
 目前主要的人体姿态估计数据集有下面几种，他们所拥有的关键点数量不同
 
-![JulyEdu_KeyPointDetection_PangYan_L2_5](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_5.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_5](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_5.png)
 
 以MSCOCO为例，这个数据集有十七个关键点
 
-![JulyEdu_KeyPointDetection_PangYan_L2_6](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_6.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_6](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_6.png)
 
 MSCOCO数据集网页，中间是图片数据集，右边是标注文件
 
-![JulyEdu_KeyPointDetection_PangYan_L2_7](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_7.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_7](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_7.png)
 
 标注文件的格式是JSON，可以直接在网页中打开或者使用Python读取，其中分为五个部分
 
@@ -37,11 +37,11 @@ MSCOCO数据集网页，中间是图片数据集，右边是标注文件
 4. "annotations"：标注
 5. "categories"：类别
 
-![JulyEdu_KeyPointDetection_PangYan_L2_8](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_8.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_8](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_8.png)
 
 下面是标注文件前三个信息的情况
 
-![JulyEdu_KeyPointDetection_PangYan_L2_9](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_9.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_9](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_9.png)
 
 主要要注意"categories"中的信息
 
@@ -51,7 +51,7 @@ MSCOCO数据集网页，中间是图片数据集，右边是标注文件
 - keypoints：有哪些关键点的名称
 - skeleton：代表骨骼，表示哪两个关键点可以表示一个骨骼，可以进行相连，比如说[16,14]表示第16个关键点和14个关键点可以相连
 
-![JulyEdu_KeyPointDetection_PangYan_L2_10](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_10.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_10.png)
 
 然后就是标注信息
 
@@ -67,11 +67,11 @@ MSCOCO数据集网页，中间是图片数据集，右边是标注文件
 - `keypoints`：表示人体关键点的数组，该数组大小为51，每三个数字表示一个关键点，分别为[x坐标，y坐标，可见性]。可见性有三个可能的值：0表示关键点不可见且没有被标注，1表示关键点不可见但已被标注，2表示关键点可见且已被标注。在COCO数据集中，通常有17个关键点，包括眼睛、耳朵、鼻子、肩膀、肘部、手腕、臀部、膝盖和脚踝。
 - `num_keypoints`：图像中被标注的关键点数量。
 
-![JulyEdu_KeyPointDetection_PangYan_L2_11](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_11.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_11](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_11.png)
 
 当然
 
-![JulyEdu_KeyPointDetection_PangYan_L2_23](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_23.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_23](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_23.png)
 
 头部的点范围最小，比如说眼睛耳朵，身体上的点就更大，尤其是臀部
 
@@ -89,25 +89,25 @@ MSCOCO数据集网页，中间是图片数据集，右边是标注文件
 
 多人姿态估计的方法有自上而下（先具体到每个人，然后对单人进行姿态估计，即Top-down，先找人后找点）和自底向上（先识别关节点，然后将其组合成人体，Bottom-up）两种方式或者说两种分支
 
-![JulyEdu_KeyPointDetection_PangYan_L2_15](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_15.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_15](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_15.png)
 
 ### 多人姿态估计Top-Down方式
 
 Top-down是先检测出每个人，然后对每个人进行关键点检测（这里的点是有语义的），但是对于人数较多的情况下，计算量线性增长，实时性不足
 
-![JulyEdu_KeyPointDetection_PangYan_L2_27](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_27.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_27](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_27.png)
 
 在这种方式上，有一个里程碑式的工作，即Mask R-CNN，当然并不是标准的Mask R-CNN，而是增加了其他功能的Mask R-CNN
 
 Mask R-CNN实现了联合学习，通过添加不同的head或者说分支实现不同的功能，并且有不同的损失函数进行叠加
 
-![JulyEdu_KeyPointDetection_PangYan_L2_30](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_30.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_30](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_30.png)
 
 但是随着卷积层数的增加，高级语义的信息越来越丰富，但是分辨率逐渐降低，导致难以识别小目标物体，一个解决方法就是**FPN（Feature Pyramid Network，也叫特征金字塔网络）**，这种带带在每一层上进行一个预测，然后将损失叠加起来，这样就可以完成对小目标的识别
 
 FPN主要接近物体检测中的多尺度物体，通过简单的网络连接改变，在基本不增加原有模型计算量的情况下，大幅度提高检测小目标的性能
 
-![JulyEdu_KeyPointDetection_PangYan_L2_33](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_33.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_33](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_33.png)
 
 Bottom-up对所有的关节点进行检测，然后将关键点组合起来，组合为人体骨架，这里模型会学习到人体骨架的关系，判断哪些关键点属于同一个人，适用于人数非常多的情况，但是精度稍低
 
@@ -115,7 +115,7 @@ Bottom-up对所有的关节点进行检测，然后将关键点组合起来，�
 
 人体姿态估计就是检测出关键点并且进行连接，所以评价标准与一般的目标检测不同，如下图所示，蓝色为真实标签，绿色为预测标签
 
-![JulyEdu_KeyPointDetection_PangYan_L2_17](.\assets\JulyEdu_KeyPointDetection_PangYan_L2_17.png)
+![JulyEdu_KeyPointDetection_PangYan_L2_17](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/JulyEdu_KeyPointDetection_PangYan_L2_17.png)
 
 我们评价关键点检测的标准是这样的：因为没办法算重合面积，所以主要是计算预测关键点和真实关键点之间的距离或者误差
 

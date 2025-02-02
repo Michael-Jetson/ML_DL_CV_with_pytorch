@@ -8,23 +8,29 @@
 
 ## CNN历史：ImageNet挑战赛的发展
 
+## LeNet
+
+这个网络可以说是真正意义上的第一个CNN网络，只不过受限于当时的水平，只能做的很小并且在简单的数据集上进行训练，所以应用面受限，只能用于邮局的手写数字识别
+
 ## AlexNet
 
 AlexNet是计算机视觉领域历史性的论文，或者说是深度学习计算机视觉的开创性论文，代表了计算机视觉或计算机科学领域的重要进步
 
-AlexNet的架构如下
+AlexNet的架构如下，当初为了在两个GPU上计算，使用了两个通道，这也是一种工程技巧，后面随着GPU的发展和深度学习框架的出现，我们无需完成那么多的工作量即可轻松复现网络
 
-![](./assets/AlexNet-Fig_03.png)
+![](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/AlexNet-Fig_03.png)
 
 第一层是卷积层，卷积核大小为11x11，数量为64，步长为4，填充为2，所以输出大小为64通道，宽高为56
-![](./assets/eecs8-28.jpg)
 
-![](./assets/eecs8-31.jpg)
+![EECS498_L8_28](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L8_28.png)
+
+![EECS498_L8_31](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L8_31.png)
+
 Alexnet 早期卷积层需要较多的内存开销，且相比全连接层需要更多的浮点数计算；全连接层占用的参数远大于卷积层，且展开后的第一个全连接层需要的参数最多。
 
 不过AlexNet为什么使用两层全连接层，李沐老师的解释是前面卷积层提取的特征不够深，需要两个全连接层来继续深化，如果只使用一个全连接层那么效果会变差
 
-AlexNet的代码如下
+AlexNet的PyTorch代码实现如下
 
 ```python
 # 导入pytorch库
@@ -100,16 +106,22 @@ class AlexNet(nn.Module):
 # if确保只有单独运行该模块时，此表达式才成立，才可以进入此判断语法，执行其中的测试代码，反之不行
 if __name__ == '__main__':
     # rand：返回一个张量，包含了从区间[0, 1)的均匀分布中抽取的一组随机数，此处为四维张量
-    x = torch.rand([1, 3, 224, 224])
+    x = torch.rand([16, 3, 224, 224])
     # 模型实例化
     model = MyAlexNet()
     y = model(x)
+
 ```
 
+这是第一个真正意义上的现代神经网络，并且使用了大量的工程技巧，如对图片进行翻转、裁剪，Dropout正则化等等
 
+![YSAI_ImageClassification_L2_19](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L2_19.png)
+
+![YSAI_ImageClassification_L2_21](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/YSAI_ImageClassification_L2_21.png)
 
 ## ZF Net
-![](./assets/eecs9-33.png)
+
+![EECS498_L8_34](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L8_34.png)
 
 这个网络实际上就是一个更大的AlexNet，并没有做出太大的创新，只是在某些超参数上进行了调整，思想上与AlexNet一致
 
@@ -168,7 +180,8 @@ GoogleLeNet是谷歌团队研究出的网络，发表于2014年，这是谷歌�
 
 当然，这个也是第一个真正意义上的深度神经网络，其深度可以超过100层
 
-![](./assets/eecs8-52.jpg)
+![EECS498_L8_52](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L8_52.png)
+
 另一个特点就是使用Inception块来代替传统卷积，这个模块是一种重复的局部结构，由四路并行的卷积/池化模块组成,并在最终使用全局平均池化层来折叠空间维度。
 
 四个路径从不同层面抽取信息，然后在输出通道维度进行合并，或者说每个块不会改变高宽，但是会大量增加通道数量，这种方式相比于单种卷积层，参数更少，计算复杂度更低

@@ -6,7 +6,7 @@
 
 在深度学习元年（2012年）之前，所有的计算机视觉任务的精度都不是很高，发展平稳，而且在发展到一段时间后陷入了瓶颈期（2010-2012的mAP指数上升缓慢）
 
-![4](./assets/4.jpg)
+![EECS498_L16_5](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_5.jpg)
 
 但是在2013年开始，人们将深度学习应用于计算机视觉任务中，使得视觉的精度有了快速的增长，而且还是持续的增长
 
@@ -16,7 +16,7 @@
 
 在第一个经典目标检测算法R-CNN中，使用训练好的CNN来对那些使用选择性搜索方法筛选出来的区域进行预测，然后尝试拟合出一个最好的边界框，因为最开始的方法是基于选择性搜索的，所以这种候选区域方法可以视为黑盒
 
-![5](./assets/5-1684214226845-57.jpg)
+![EECS498_L16_6](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_6.jpg)
 
 然后，我们使用先卷积提取特征然后提取候选区域，这种方法大大提高了目标检测的效率；后来，神经网络方法替代了选择性搜索，目标检测速度也再度提高
 
@@ -36,7 +36,7 @@
 
 如下图所示，GT边界框表示真实边界框，包括两只狗和一只猫，其他颜色的是所有候选区域，可以看到，有的候选区域与GT边界框很吻合（深蓝色边界框），有的只包括对象的一部分（浅蓝色边界框），有的则只是背景（红色边界框）
 
-![9](./assets/9-1684216491637-1.jpg)
+![EECS498_L16_10](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_10.jpg)
 
 我们知道在Slow R-CNN中我们会使用一个卷积网络对候选区域进行分类，分为正的目标类和负的背景类，当然，在这里我们还有一种类，就如上图中的浅蓝色框，只包含了对象的一部分，虽然也不是错误的，但是离完整的边界框还有一段距离，可以称为中性框
 
@@ -48,7 +48,7 @@
 
 下一步，挑选出来正边界框或者正类候选区域，将裁剪出的图像进行大小调整，转化为标准分辨率的图像，然后使用另一个卷积神经网络去预测类别和边界框回归变换
 
-![11](./assets/11-1684221088780-3.jpg)
+![EECS498_L16_12](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_12.jpg)
 
 也就是说，对于负类，我们只需要区分类别就可以，对于正类，我们再进行分类和定位，所以需要让二分类网络记住这些背景区域和目标区域
 
@@ -60,11 +60,11 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 不过在Fast R-CNN中，会使用一种特征裁剪的方式RoI池化，来对区域进行投影，投影到特征图上，这样就可以简化计算，然后对区域对应的特征图进行池化，然后输入到第二阶段中去，这样可以便于对齐，可以更好的进行目标检测
 
-![20](./assets/20.jpg)
+![EECS498_L16_21](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_21.jpg)
 
 我们实现的方法就是使用双线性插值，在图像的特征图的单元直接进行插值
 
-![23](./assets/23-1684225827454-6.jpg)
+![EECS498_L16_24](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_24.jpg)
 
 这种方式还可以解决反向传播问题
 
@@ -72,11 +72,11 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 我们知道，Faster R-CNN和单阶段目标检测方法是依赖于锚框的，所以有没有不依赖于锚框的检测方法呢
 
-![30](./assets/30.jpg)
+![EECS498_L16_31](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_31.jpg)
 
 实际上是有的，那就是密歇根大学的几个教授在2018年完成的这篇论文，其中的创新点是使用CornerNet来实现目标检测，不同于之前的方法
 
-![31](./assets/31-1684227508702-9.jpg)
+![EECS498_L16_32](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_32.jpg)
 
 这个网络的想法是，改变我们对边界框的参数化方式，我们现在要用左上角和右下角来表示边界框，然后用来检测边界框，我们只需要让让图像的像素决定
 
@@ -89,7 +89,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 语义分割任务就是我们对图像中的每个像素打标签，比如说下图中这只猫，我们希望对属于猫这个对象的每个像素都打上相应的标签
 
-![34](./assets/34-1684230376740-11.jpg)
+![EECS498_L16_35](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_35.jpg)
 
 当然，在语义分割中，并不会区分不同的对象，只是负责给对象打类别标签，也就是说，如果有两个紧邻的同一个类别的对象，那么会打上同一种颜色的标签（如上图中的奶牛），不会区分不同的实例
 
@@ -97,7 +97,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 我们有一个不成熟的想法，就是使用滑动窗口的方法，不断预测某一个小区域的类别，然后给予相应的标签
 
-![36](./assets/36-1684231681428-13.jpg)
+![EECS498_L16_37](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_37.jpg)
 
 当然这种方法效率是很低的，因为需要大量重复的计算，并且没有共享特征
 
@@ -109,13 +109,13 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 然后损失函数则是每个像素的交叉熵损失
 
-![37](./assets/37-1684232291206-15.jpg)
+![EECS498_L16_38](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_38.jpg)
 
 当然，模型如何知道图像中有多少类别呢？其实这个类似于分类网络，我们预先选择一组类别（这个由训练数据集决定），然后进行设置
 
 为了做出好的分割决策，我们实际上可能希望根据输入图像中相对较大的区域来做出决定，所以我们想，如果使用3x3卷积，那么感受野大小会是线性增长的，两个3x3卷积叠在一起，那么第二层的输出实际上就是查看5x5的区域，每多一层，感受野大小就会加二，这意味着我们实际上需要非常多的层才能获得非常大的感受野大小
 
-![39](./assets/39-1684233836073-17.jpg)
+![EECS498_L16_40](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_40.jpg)
 
 所以就会产生问题，我们经常想要在相对高分辨率的图像上完成分割，比如说互联网图像和卫星图像，这些图像可能有以百万计的像素，导致这种方式的计算量非常大，所以需要进行改进
 
@@ -131,13 +131,13 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 在网络开始的时候进行下采样，这样就可以提取很多特征，就类似于图像分类中一样，我们甚至可以使用池化方式去进行下采样，但是什么是上采样呢
 
-![41](./assets/41-1684236405827-19.jpg)
+![EECS498_L16_42](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_42.jpg)
 
 上采样可能是一种与池化操作相反的过程，或者可以称为**反池化（Unpooling）**
 
 比如说我们输入一个2x2大小的矩阵，上采样就可以实现一个空间上两倍大小的输出，通道数不变
 
-![43](./assets/43-1684236587614-21.jpg)
+![EECS498_L16_44](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_44.jpg)
 
 **钉床（Bed of Nails，也可译为床钉）**：这种方法的名字来源于它的工作原理与形状。"Bed of Nails"是一种上采样策略，其工作原理类似于在下采样时丢失的位置放置"钉子"（即非零值），然后通过插值或其他方法在其他位置生成值，从而恢复原始的分辨率。在这里，我们是将原特征向量复制到每个对应区域的左上角，然后其他办法用零值填充。当然这不是一个很好的方法，所以人们通常使用另一种方法。
 
@@ -147,7 +147,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 **双线性插值（Bilinear Interpolation）**：在图像上采样中，双线性插值的操作可以这样理解：对于目标图像中的每一个像素，先在水平方向进行线性插值，然后在垂直方向进行线性插值，得到最终的像素值。
 
-![44](./assets/44.jpg)
+![EECS498_L16_45](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_45.jpg)
 
 举个例子，如果我们想在一个2x2的像素格子中插入一个新的像素，我们可以先在水平方向上，对左侧像素和右侧像素进行线性插值，然后在垂直方向上，对上侧像素和下侧像素进行线性插值，最后，我们就得到了新的像素的值。
 
@@ -155,7 +155,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 **双三次插值**：它是一种更高级的插值方式，相比于最近邻插值和双线性插值，可以得到更加平滑、更少锯齿状的图像。
 
-![45](./assets/45.jpg)
+![EECS498_L16_46](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_46.jpg?raw=true)
 
 在双三次插值中，新的像素值是通过考察附近16个像素（在一个4x4的区域内）并使用这些像素的值进行加权计算得到的。具体的加权系数由三次插值函数决定，这个插值函数考虑到了像素之间的距离关系。
 
@@ -163,7 +163,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 **最大反池化（Max Unpooling）**：这种方法的主要目的是恢复被池化（pooling）操作降低的图像分辨率。
 
-![46](./assets/46-1684244400435-2.jpg)
+![EECS498_L16_47](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_47.jpg)
 
 在最大池化（Max Pooling）操作中，输入的特征图被分成若干个非重叠的区域，每个区域内取最大值作为该区域的代表，这样能够大大减小特征图的尺寸。但在这个过程中，我们会丢失很多细节信息，这对于语义分割任务来说是不可接受的。
 
@@ -187,7 +187,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 普通的带有步长和填充的卷积大家很熟悉了已经（如下图所示），那么可学习的卷积是什么呢？
 
-![49](./assets/49-1684246930314-4.jpg)
+![EECS498_L16_50](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_50.jpg)
 
 我们知道，步长大于等于1的卷积，实际上就是一个可学习的下采样操作，去提取特征，而可学习的这个属性意味着网络可以学习如何最好地进行下采样，以便最大化某些任务的性能，这也是为什么许多现代的卷积神经网络结构，如ResNet和DenseNet，倾向于使用步长大于1的卷积替代池化操作进行下采样。
 
@@ -195,13 +195,13 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 但是，如果我们的步长小于1呢？这样，卷积可以通过某种方式，为输入中的每个点跨越输出中的多个点，如果我们能想出一种方法来做到这一点，那么是不是就可以实现一种可学习的上采样操作？实际上是有的，也就是**转置卷积**
 
-![58](./assets/58.jpg)
+![EECS498_L16_59](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_59.jpg)
 
 它的工作方式是这样的，首先输入一个低分辨率的数据，想输出一个高分辨率的数据（如上图所示），不过与常规卷积不同，我们这里是使用输入张量中的元素乘以转置卷积核（标量乘以张量），然后得到输出，并且将数值复制到输出张量的相应位置上，然后我们在输入中移动一个位置，在输出中移动两个位置，再次执行反卷积操作，如果有重合的地方，则进行求和
 
 或者我们可以换一个视角去看这个操作
 
-![59](./assets/59.jpg)
+![EECS498_L16_60](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_60.jpg)
 
 ### 矩阵化的转置卷积
 
@@ -215,7 +215,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 下图是一个一维卷积的例子，左边是使用矩阵乘法代替卷积运算，右边是转置卷积，可以看到是将前面的卷积矩阵进行转置，卷积和转置卷积在数学上相同或者等价，只不过在填充等方面稍有不同
 
-![62](./assets/62.jpg)
+![EECS498_L16_63](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_63.jpg)
 
 **注意一下，转置卷积不是卷积的逆运算，转置卷积也是卷积**
 
@@ -223,7 +223,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 在计算机视觉和语义分割中，"stuff"和"thing"是两种不同类型的语义类别。
 
-![67](./assets/67-1684299007292-9.jpg)
+![EECS498_L16_68](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_68.jpg)
 
 "Thing"通常指的是可数的、有独立存在的物体，如人、汽车、自行车等。这些对象通常有明确的形状和大小，而且在图像中可以被清晰地辨识出来，可以区分为不同的实例（Instance）。
 
@@ -237,7 +237,7 @@ Fast R-CNN的训练方法与Slow R-CNN的方法基本一致，只不过因为在
 
 我们已经了解了目标检测和语义分割，前者可以区分不同对象实例，后者分割不同类别，但是抛弃了实例的概念，所以需要一种更高级的算法来实现目标检测+语义分割，也就是既要区分不同对象，也要完成像素级分割，也就是**实例分割（Instance Segmentation）**
 
-![71](./assets/71.jpg)
+![EECS498_L16_72](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_72.jpg)
 
 我们想实现实例分割，就需要基于目标检测算法，对于每一个检测出的对象，输出一个**分割掩码（segmentation mask）**
 
@@ -247,27 +247,27 @@ Mask R-CNN就是一个很经典的实例分割算法
 
 其相对于Faster R-CNN的改进就是，在从特征图上抽取出候选区域的时候，会额外附加一个分支用来完成Mask Prediction
 
-![73](./assets/73.jpg)
+![EECS498_L16_74](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_74.jpg)
 
 具体工作方式是这样的，我们仍然通过骨干网络提取网络特征，然后使用RPN预测候选区域，然后通过RoI对齐来获得特征图，然后在每个候选区域上运行一个小的语义分割网络，这个网络会为检测到的对象来预测一个分割掩码
 
-![74](./assets/74-1684301332939-13.jpg)
+![EECS498_L16_75](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_75.jpg)
 
 看起来，Mask R-CNN有点像目标检测和语义分割联合起来了，我们只是对检测到的对象进行语义分割，这意味着训练这些分割掩码的目标就是与候选区域的边界框对齐
 
 如下图所示，红色边界框中是我们想检测的对象，我们的目标就是让分割掩码与检测到的对象的边界对齐
 
-![78](./assets/78-1684302354175-15.jpg)
+![78](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_79.jpg)
 
 这是一个非常好的算法，他不但会使用目标检测方法完成边界框的输出，对于每个边界框，实际上也会输出分割掩码来告诉我们，边界框中的哪些像素实际上对应检测到的对象
 
-![79](./assets/79-1684302757980-17.jpg)
+![EECS498_L16_80](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_80.jpg)
 
 ## 全景分割（Panoptic Segmentation）
 
 这是一种混合任务，混合了语义分割和实例分割，它想要标记每个像素，同时对于同一个类别的不同物体加以区分，或者说同时处理"stuff"类别（如天空、草地等大面积的、不可数的物体）和"thing"类别（如汽车、人等可数的、独立的物体实例）。全景分割的目标是为图像中的每个像素点都分配一个类别标签，并且在"thing"类别上区分出不同的实例。
 
-![82](./assets/82.jpg)
+![EECS498_L16_83](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_83.jpg)
 
 实例分割和全景分割的主要区别在于全景分割更加全面，它同时处理了语义分割和实例分割两种任务。实例分割主要关注"thing"类别的识别和分割，而全景分割则旨在对所有的像素点进行准确的分类和分割。
 
@@ -279,25 +279,25 @@ Mask R-CNN就是一个很经典的实例分割算法
 
 我们首先分割出不同的人体实例，然后使用某种方法去估计其姿势，常用的一种方法就是定义一组关键点，比如说眼睛、鼻子和各种关节
 
-![83](./assets/83.jpg)
+![EECS498_L16_84](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_84.jpg)
 
 想完成这一步的一种方法，就是使用Mask R-CNN实现关键点检测，我们可以在Mask R-CNN上再加一个关键点预测网络来预测关键点
 
-![86](./assets/86.jpg)
+![EECS498_L16_87](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_87.jpg)
 
 这个新加入的网络，只是预测十七个关键点，因为我们认为想确定人体姿态，十七个关键点就足够了，然后使用交叉熵损失训练
 
-![87](./assets/87-1684333675727-20.jpg)
+![EECS498_L16_88](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_88.jpg)
 
 训练效果如下
 
-![88](./assets/88-1684333787017-22.jpg)
+![EECS498_L16_89](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_89.jpg)
 
 ## 通用想法
 
 我们现在有了一种很通用的想法，就是如果我们想在输入图像的不同区域做某些新颖类型的预测，那么就可以将其框定为一个目标检测任务，然后在目标检测器上加一个“Heads”，这个“Heads”就可以在输入图像的每个区域产生额外的新型输出
 
-![89](./assets/89.jpg)
+![EECS498_L16_90](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_90.jpg)
 
 ## 密集字幕
 
@@ -305,4 +305,4 @@ Mask R-CNN就是一个很经典的实例分割算法
 
 你可以通过将LSTM这种模型添加到特征区域顶部来实现
 
-![91](./assets/91-1684334492507-25.jpg)
+![EECS498_L16_92](https://raw.githubusercontent.com/Michael-Jetson/Images/main/UpGit_Auto_UpLoad/EECS498_L16_92.jpg)

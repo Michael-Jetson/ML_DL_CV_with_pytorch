@@ -4,13 +4,13 @@ Autoware是世界上第一款开源自动驾驶框架。是在名古屋大学加
 
 其框架如图
 
-![Autoware.ai_L1_5](/home/pengfei/文档/ML_DL_CV_with_pytorch/AutoDriving/assets/Autoware.ai_L1_5.png)
+![Autoware.ai_L1_5](./assets/Autoware.ai_L1_5.png)
 
 从各种传感器的信号输入到车辆的输出，中间都是由Autoware框架组织起来的
 
 实际上Autoware的定位就是在应用层上做软件算法，基于ros，实际上很多公司在实际开发中不会使用ros做中间层，甚至不会使用ubuntu做OS，但是这些公司自己开发的中间件或者OS也是基于ROS和Ubuntu修改的
 
-![Autoware.ai_L1_6](/home/pengfei/文档/ML_DL_CV_with_pytorch/AutoDriving/assets/Autoware.ai_L1_6.png)
+![Autoware.ai_L1_6](./assets/Autoware.ai_L1_6.png)
 
 # 代码Overview
 
