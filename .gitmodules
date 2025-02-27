@@ -1,3 +1,0 @@
-[submodule "pytorch_image_classification"]
-	path = pytorch_image_classification
-	url = https://github.com/hysts/pytorch_image_classification
